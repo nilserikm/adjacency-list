@@ -176,6 +176,12 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+
+        /**
+         * closure table
+         * adjacency-list
+         */
+        'Franzose\ClosureTable\ClosureTableServiceProvider',
     ],
 
     /*
