@@ -14,3 +14,7 @@
 Route::get('/smaller', function() {
     return view('small-tree');
 });
+
+Route::get('/tree', 'WelcomeController@getTree');
+Route::post('/tree/add-leaf', 'WelcomeController@addLeaf');
+Route::post('/tree/delete-leaf', 'WelcomeController@deleteLeaf');
