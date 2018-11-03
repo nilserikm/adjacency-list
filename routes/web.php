@@ -11,7 +11,6 @@
 |
 */
 
-Route::get('/', 'WelcomeController@welcome');
-//Route::get('/', function () {
-//    return view('welcome');
-//});
+Route::get('/smaller', function() {
+    return view('small-tree');
+});

@@ -13,7 +13,6 @@
     <body>
         <h1>adjacency list</h1>
         <div>
-            <h2>tree</h2>
             count: {{ $count }} <br/>
             duration: {{ $duration }} <br/>
             add single: {{ $addDuration }} <br/>
@@ -24,6 +23,10 @@
             subtree count: {{ $subtreeCount }} <br/>
             root: {{ $root }} <br/>
             after count: {{ $afterCount }} <br/>
+        </div>
+
+        <div>
+            {{ $tree }}
         </div>
     </body>
 </html>
