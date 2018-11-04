@@ -16,6 +16,7 @@ Route::get('/smaller', function() {
 });
 
 Route::get('/tree', 'WelcomeController@getTree');
+Route::post('/tree/add-root-child', 'WelcomeController@addRootChild');
 Route::post('/tree/add-leaf', 'WelcomeController@addLeaf');
 Route::post('/tree/delete-leaf', 'WelcomeController@deleteLeaf');
 Route::post('/tree/delete-node-with-children', 'WelcomeController@deleteNodeWithChildren');

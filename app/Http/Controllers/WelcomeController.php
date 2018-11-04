@@ -8,6 +8,50 @@ use Illuminate\Http\Request;
 class WelcomeController extends Controller
 {
     /**
+     * Adds a new right-hand child to the root node
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function addRootChild(Request $request)
+    {
+        $start = microtime(true);
+        $success = false;
+        $httpCode = 500;
+        $root = \App\node::find(1);
+
+        if (empty($root)) {
+            $message = "root does not exist";
+        } else {
+            try {
+                $newChild = new \App\node();
+                $newChild->title = "new root child";
+
+                if (!$root->hasChildren()) {
+                    $root->addChild($newChild, 0);
+                } else {
+                    $lastChild = $root->getLastChild();
+                    $position = $lastChild->position + 1;
+                    $root->addChild($newChild, $position);
+                }
+
+                $message = "root child should be added now ...";
+                $httpCode = 200;
+                $success = true;
+            } catch(\Exception $exception) {
+                $message = $exception->getMessage();
+                $httpCode = $exception->getCode();
+            }
+        }
+
+        return response()->json([
+            'success' => $success,
+            'message' => $message,
+            'allCount' => $this->getCount($root),
+            'time' => microtime(true) - $start
+        ], $httpCode);
+    }
+
+    /**
      * Deletes a node along with its children
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse

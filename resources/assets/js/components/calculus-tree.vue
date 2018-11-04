@@ -11,6 +11,18 @@
             </ul>
         </div>
 
+        <!-- Add root child section -->
+        <div class="tree-section add-root-child">
+            <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                @click="addRootChild"
+            >
+                Add root child
+            </button>
+            <p>Time to add root child: <span class="dataEntry">{{ addRootChildTime === null ? "No process ..." : addRootChildTime }}</span></p>
+        </div>
+
         <!-- Add a leaf section -->
         <div class="tree-section add-child">
             <button
@@ -63,6 +75,7 @@
     }
 
     .add-child,
+    .add-root-child,
     .delete-child {
         display: flex;
         flex-direction: row;

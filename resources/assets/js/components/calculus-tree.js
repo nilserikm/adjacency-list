@@ -8,6 +8,7 @@ export default {
 
             // data variables
             addLeafTime: null,
+            addRootChildTime: null,
             allCount: null,
             deleteLeafTime: null,
             deleteNodeWithChildrenTime: null,
@@ -21,13 +22,27 @@ export default {
 
     methods: {
         /**
+         * Adds another child to the root node
+         * @returns {void}
+         */
+        addRootChild() {
+            axios.post('/tree/add-root-child').then((response) => {
+                console.log(response);
+                this.allCount = response.data.allCount;
+                this.addRootChildTime = response.data.time;
+            }).catch((error) => {
+                console.log("something went wrong when adding root child ...");
+                console.log(error);
+            });
+        },
+
+        /**
          * Deletes a node along with its children
          * @returns {void}
          */
         deleteNodeWithChildren() {
             axios.post('/tree/delete-node-with-children').then((response) => {
                 console.log("deleted node id: ", response.data.deletedNodeId);
-
                 this.allCount = response.data.allCount;
                 this.deleteNodeWithChildrenTime = response.data.time;
             }).catch((error) => {
