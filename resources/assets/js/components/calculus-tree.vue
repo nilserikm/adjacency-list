@@ -8,8 +8,30 @@
             <ul>
                 <li>Time to fetch entire tree: <span class="dataEntry">{{ fetchTreeTime }}</span></li>
                 <li>Number of nodes in tree: <span class="dataEntry">{{ allCount }}</span></li>
-                <li>Feedback: <span class="dataEntry">{{ feedback }}</span></li>
+                <li>Feedback: <span class="dataEntry" v-bind:class="{ error : feedbackError }">{{ feedback }}</span></li>
             </ul>
+        </div>
+
+        <!-- Duplicate node section -->
+        <div class="tree-section duplicate-node-by-id">
+            <div>
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    @click="duplicateById"
+                >
+                    Duplicate node by id
+                </button>
+                <input
+                    id="duplicate-node-id"
+                    class="form-control"
+                    type="text"
+                    v-model="duplicateId"
+                />
+            </div>
+            <div>
+                <p>Time to duplicate node by id: <span class="dataEntry">{{ duplicateByIdTime === null ? "No process ..." : duplicateByIdTime }}</span></p>
+            </div>
         </div>
 
         <!-- Add root child section -->
@@ -50,7 +72,7 @@
                     id="delete-node-id"
                     class="form-control"
                     type="text"
-                    v-model="nodeId"
+                    v-model="deleteId"
                 />
             </div>
             <div>
@@ -89,6 +111,12 @@
         font-weight: bold;
     }
 
+    .error {
+        /*background-color: indianred;*/
+        /*color: white;*/
+        border-bottom: 3px solid indianred;
+    }
+
     .tree-container {
         padding: 20px;
     }
@@ -97,21 +125,25 @@
         padding: 10px 0;
     }
 
-    .delete-node-by-id {
+    .delete-node-by-id,
+    .duplicate-node-by-id {
         display: flex;
         flex-direction: column;
     }
 
-    .delete-node-by-id div {
+    .delete-node-by-id div,
+    .duplicate-node-by-id div {
         margin-bottom: 10px;
     }
 
-    .delete-node-by-id div:first-child {
+    .delete-node-by-id div:first-child,
+    .duplicate-node-by-id div:first-child {
         display: flex;
         flex-direction: row;
     }
 
-    .delete-node-by-id div:first-child button {
+    .delete-node-by-id div:first-child button,
+    .duplicate-node-by-id div:first-child button {
         margin-right: 20px;
     }
 

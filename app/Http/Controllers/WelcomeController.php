@@ -4,9 +4,111 @@ namespace App\Http\Controllers;
 
 use App\node;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class WelcomeController extends Controller
 {
+    /**
+     * Duplicates the root's last child to the right of that last child
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function duplicateById(Request $request)
+    {
+        $start = microtime(true);
+        $success = false;
+        $httpCode = 500;
+        $node = \App\node::find($request->input('duplicateId'));
+        $root = \App\node::find(1);
+
+        if (empty($root)) {
+            $message = "Unable to find root ...";
+        } else if (is_null($node)) {
+            $message = "Node not found (" . $request->input('duplicateId') . ") ...";
+        } else {
+            if (!$this->duplicateNode($node)) {
+                $message = "Something went wrong when trying to duplicate the node ...";
+            } else {
+                $message = "Node duplicated ...";
+                $success = true;
+                $httpCode = 200;
+            }
+        }
+
+        return response()->json([
+            'success' => $success,
+            'message' => $message,
+            'allCount' => $this->getCount($root),
+            'time' => microtime(true) - $start,
+            'treeDesc' => is_null($node) ? null : $node->getDescendantsTree()
+        ], $httpCode);
+    }
+
+    /**
+     * Returns true if the node was duplicated properly, false otherwise
+     * @param node $node
+     * @return boolean
+     */
+    public function duplicateNode(\App\node $node)
+    {
+        if (!$node->isRoot()) {
+            if (!$node->hasChildren()) {
+                $clone = new \App\node();
+                $clone->title = "clone " . $node->title;
+                $node->addSibling($clone);
+            } else {
+                $clone = new \App\node();
+                $clone->title = "clone " . $node->title;
+                $node->addSibling($clone);
+                $tree = $node->getDescendantsTree();
+                $this->duplicateTree($clone, $tree);
+            }
+        } else {
+            if (!$node->hasChildren()) {
+                dd("node IS root, NO children");
+            } else {
+                dd("node is NOT root, HAS children");
+            }
+        }
+
+        return true;
+    }
+
+    public function duplicateTree(\App\node $root, Collection $tree)
+    {
+        foreach($tree as $node) {
+            $copy = new \App\node();
+            $copy->title = $node->title;
+
+            $root->addChild($copy, $node->position);
+
+            if ($node->hasChildren()) {
+                $this->duplicateTree($node);
+            }
+        }
+    }
+
+    /**
+     * Returns the first found (left-hand) leaf
+     * @param node $node
+     * @return node|mixed
+     */
+    public function getFirstLeaf(\App\node $node)
+    {
+        if (!$node->hasChildren()) {
+            return $node;
+        } else {
+            $children = $node->getChildren();
+            foreach($children as $child) {
+                if (!$child->hasChildren()) {
+                    return $child;
+                } else {
+                    return $this->getFirstLeaf($child);
+                }
+            }
+        }
+    }
+
     /**
      * Deletes a node and its children and descendants
      * @param Request $request
@@ -18,14 +120,14 @@ class WelcomeController extends Controller
         $success = false;
         $httpCode = 500;
         $root = \App\node::find(1);
-        $node = \App\node::find($request->input('nodeId'));
+        $node = \App\node::find($request->input('deleteId'));
 
         if (empty($root)) {
             $message = "root does not exist";
-        } else if (is_null($request->input('nodeId'))) {
+        } else if (is_null($request->input('deleteId'))) {
             $message = "node id cannot be null";
         } else if (is_null($node)) {
-            $message = "node not found (" . $request->input('nodeId') . ")";
+            $message = "Node not found (" . $request->input('deleteId') . ") ...";
         } else {
             try {
                 $node->deleteSubtree(true);
@@ -43,7 +145,7 @@ class WelcomeController extends Controller
             'success' => $success,
             'message' => $message,
             'allCount' => $this->getCount($root),
-            'nodeId' => $request->input('nodeId'),
+            'deleteId' => $request->input('deleteId'),
             'time' => microtime(true) - $start
         ], $httpCode);
     }
@@ -209,27 +311,6 @@ class WelcomeController extends Controller
             'allCount' => $this->getCount($root),
             'time' => microtime(true) - $start,
         ], $httpCode);
-    }
-
-    /**
-     * Returns the first found (left-hand) leaf
-     * @param node $node
-     * @return node|mixed
-     */
-    public function getFirstLeaf(\App\node $node)
-    {
-        if (!$node->hasChildren()) {
-            return $node;
-        } else {
-            $children = $node->getChildren();
-            foreach($children as $child) {
-                if (!$child->hasChildren()) {
-                    return $child;
-                } else {
-                    return $this->getFirstLeaf($child);
-                }
-            }
-        }
     }
 
     /**

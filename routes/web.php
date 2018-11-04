@@ -21,3 +21,4 @@ Route::post('/tree/add-leaf', 'WelcomeController@addLeaf');
 Route::post('/tree/delete-leaf', 'WelcomeController@deleteLeaf');
 Route::post('/tree/delete-by-id', 'WelcomeController@deleteById');
 Route::post('/tree/delete-node-with-children', 'WelcomeController@deleteNodeWithChildren');
+Route::post('/tree/duplicate-by-id', 'WelcomeController@duplicateById');

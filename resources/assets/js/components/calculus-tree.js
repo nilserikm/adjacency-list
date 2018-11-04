@@ -12,10 +12,13 @@ export default {
             allCount: null,
             deleteLeafTime: null,
             deleteByIdTime: null,
+            deleteId: null,
             deleteNodeWithChildrenTime: null,
+            duplicateByIdTime: null,
+            duplicateId: null,
             feedback: "",
+            feedbackError: false,
             fetchTreeTime: null,
-            nodeId: null
         }
     },
 
@@ -25,22 +28,48 @@ export default {
 
     methods: {
         /**
+         * Duplicates the root's last child to the right of that child
+         * @returns {void}
+         */
+        duplicateById() {
+            if (isNaN(parseInt(this.duplicateId))) {
+                this.duplicateId = "";
+                this.setFeedback("No node ID specified ...", 'error');
+            } else {
+                let data = { 'duplicateId': this.duplicateId };
+
+                axios.post('/tree/duplicate-by-id', data).then((response) => {
+                    this.allCount = response.data.allCount;
+                    this.duplicateByIdTime = response.data.time;
+                    this.duplicateId = "";
+                    this.setFeedback(response.data.message);
+                    console.log(response.data.treeDesc);
+                }).catch((error) => {
+                    this.duplicateId = "";
+                    this.setFeedback(error.response.data.message, 'error');
+                });
+            }
+        },
+
+        /**
          * Deletes a node and its children/descendants by it's id
          * @returns {void}
          */
         deleteById() {
-            if (isNaN(parseInt(this.nodeId))) {
-                this.setFeedback("No node ID specified ...");
+            if (isNaN(parseInt(this.deleteId))) {
+                this.deleteId = "";
+                this.setFeedback("No node ID specified ...", 'error');
             } else {
-                let data = { 'nodeId': this.nodeId };
+                let data = { 'deleteId': this.deleteId };
 
                 axios.post('/tree/delete-by-id', data).then((response) => {
                     this.deleteByIdTime = response.data.time;
-                    this.nodeId = "";
+                    this.deleteId = "";
                     this.allCount = response.data.allCount;
                     this.setFeedback(response.data.message);
                 }).catch((error) => {
-                    this.setFeedback(error.response.data.message);
+                    this.deleteId = "";
+                    this.setFeedback(error.response.data.message, 'error');
                 });
             }
         },
@@ -56,7 +85,7 @@ export default {
                 this.addRootChildTime = response.data.time;
                 this.setFeedback(response.data.message);
             }).catch((error) => {
-                this.setFeedback(error.response.data.message);
+                this.setFeedback(error.response.data.message, 'error');
                 console.log(error);
             });
         },
@@ -71,7 +100,7 @@ export default {
                 this.deleteNodeWithChildrenTime = response.data.time;
                 this.setFeedback(response.data.message);
             }).catch((error) => {
-                this.setFeedback(error.response.data.message);
+                this.setFeedback(error.response.data.message, 'error');
                 console.log(error);
             });
         },
@@ -86,7 +115,7 @@ export default {
                 this.deleteLeafTime = response.data.time;
                 this.setFeedback(response.data.message);
             }).catch((error) => {
-                this.setFeedback(error.response.data.message);
+                this.setFeedback(error.response.data.message, 'error');
                 console.log(error);
             });
         },
@@ -102,7 +131,7 @@ export default {
                 this.addLeafTime = response.data.time;
                 this.setFeedback(response.data.message);
             }).catch((error) => {
-                this.setFeedback(error.response.data.message);
+                this.setFeedback(error.response.data.message, 'error');
                 console.log(error);
             });
         },
@@ -118,7 +147,7 @@ export default {
                 this.fetchTreeTime = response.data.time;
                 this.setFeedback(response.data.message);
             }).catch((error) => {
-                this.setFeedback(error.response.data.message);
+                this.setFeedback(error.response.data.message, 'error');
                 console.log(error);
             });
         },
@@ -126,9 +155,16 @@ export default {
         /**
          * Sets the error message
          * @param message
+         * @param type - string
          * @returns {void}
          */
-        setFeedback(message) {
+        setFeedback(message, type="response") {
+            if (type === "error") {
+                this.feedbackError = true;
+            } else {
+                this.feedbackError = false;
+            }
+
             this.feedback = message;
         }
     },
