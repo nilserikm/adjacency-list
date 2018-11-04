@@ -37,6 +37,7 @@ export default {
                 axios.post('/tree/delete-by-id', data).then((response) => {
                     this.deleteByIdTime = response.data.time;
                     this.nodeId = "";
+                    this.allCount = response.data.allCount;
                     this.setFeedback(response.data.message);
                 }).catch((error) => {
                     this.setFeedback(error.response.data.message);
