@@ -67,7 +67,6 @@ export default {
          */
         deleteNodeWithChildren() {
             axios.post('/tree/delete-node-with-children').then((response) => {
-                console.log("deleted node id: ", response.data.deletedNodeId);
                 this.allCount = response.data.allCount;
                 this.deleteNodeWithChildrenTime = response.data.time;
                 this.setFeedback(response.data.message);
