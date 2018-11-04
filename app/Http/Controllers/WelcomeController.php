@@ -7,21 +7,44 @@ use Illuminate\Http\Request;
 
 class WelcomeController extends Controller
 {
+    /**
+     * Deletes a node along with its children
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function deleteNodeWithChildren(Request $request)
     {
         $start = microtime(true);
-        $success = true;
-        $message = "delete node with children";
-        $httpCode = 200;
-
+        $success = false;
+        $httpCode = 500;
         $root = \App\node::find(1);
-        $time = microtime(true) - $start;
+
+        if (empty($root)) {
+            $message = "root does not exist";
+        } else if (!$root->hasChildren()) {
+            $message = "root has no children";
+        } else {
+            try {
+                $deleteNode = $root->getChildren()[0];
+                $deletedNodeName = $deleteNode->title;
+                $deletedNodeId = $deleteNode->id;
+                $deleteNode->deleteSubtree(true);
+                $message = "subtree should be deleted now ...";
+                $httpCode = 200;
+                $success = true;
+            } catch(\Exception $exception) {
+                $message = $exception->getMessage();
+                $httpCode = $exception->getCode();
+            }
+        }
 
         return response()->json([
             'success' => $success,
             'message' => $message,
             'allCount' => $this->getCount($root),
-            'time' => $time
+            'time' => microtime(true) - $start,
+            'deletedNodeName' => is_null($deletedNodeName) ? null : $deletedNodeName,
+            'deletedNodeId' => is_null($deletedNodeId) ? null : $deletedNodeId
         ], $httpCode);
     }
 

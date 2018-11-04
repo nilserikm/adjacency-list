@@ -20,13 +20,15 @@ export default {
     },
 
     methods: {
+        /**
+         * Deletes a node along with its children
+         * @returns {void}
+         */
         deleteNodeWithChildren() {
             axios.post('/tree/delete-node-with-children').then((response) => {
-                console.log("success: ", response.data.success);
-                console.log("message: ", response.data.message);
-                console.log("allCount: ", response.data.allCount);
-                console.log(response);
+                console.log("deleted node id: ", response.data.deletedNodeId);
 
+                this.allCount = response.data.allCount;
                 this.deleteNodeWithChildrenTime = response.data.time;
             }).catch((error) => {
                 console.log("something went wrong when deleting node with children ...");
