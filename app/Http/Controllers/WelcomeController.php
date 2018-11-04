@@ -26,8 +26,8 @@ class WelcomeController extends Controller
         } else {
             try {
                 $deleteNode = $root->getChildren()[0];
-                $deletedNodeName = $deleteNode->title;
-                $deletedNodeId = $deleteNode->id;
+//                $deletedNodeName = $deleteNode->title;
+//                $deletedNodeId = $deleteNode->id;
                 $deleteNode->deleteSubtree(true);
                 $message = "subtree should be deleted now ...";
                 $httpCode = 200;
@@ -42,9 +42,9 @@ class WelcomeController extends Controller
             'success' => $success,
             'message' => $message,
             'allCount' => $this->getCount($root),
-            'time' => microtime(true) - $start,
-            'deletedNodeName' => is_null($deletedNodeName) ? null : $deletedNodeName,
-            'deletedNodeId' => is_null($deletedNodeId) ? null : $deletedNodeId
+//            'deletedNodeName' => is_null($deletedNodeName) ? null : $deletedNodeName,
+//            'deletedNodeId' => is_null($deletedNodeId) ? null : $deletedNodeId,
+            'time' => microtime(true) - $start
         ], $httpCode);
     }
 
@@ -56,29 +56,32 @@ class WelcomeController extends Controller
     public function deleteLeaf(Request $request)
     {
         $start = microtime(true);
+        $success = false;
+        $httpCode = 500;
+        $root = \App\node::find(1);
 
-        try {
-            $root = \App\node::find(1);
-            $leaf = $this->getFirstLeaf($root);
-            $parent = $leaf->getParent();
-            $parent->removeChild($leaf->position);
-
-            $success = true;
-            $httpCode = 200;
-            $message = "Leaf deleted";
-        } catch(\Exception $exception) {
-            $success = false;
-            $httpCode = 500;
-            $message = $exception->getMessage();
+        if (empty($root)) {
+            $message = "root does not exist";
+        } else if (!$root->hasChildren()) {
+            $message = "root has no children";
+        } else {
+            try {
+                $leaf = $this->getFirstLeaf($root);
+                $parent = $leaf->getParent();
+                $parent->removeChild($leaf->position);
+                $success = true;
+                $httpCode = 200;
+                $message = "Leaf deleted";
+            } catch(\Exception $exception) {
+                $message = $exception->getMessage();
+            }
         }
-
-        $deleteLeafTime = microtime(true) - $start;
 
         return response()->json([
             'success' => $success,
             'message' => $message,
             'allCount' => $this->getCount($root),
-            'deleteLeafTime' => $deleteLeafTime
+            'time' => microtime(true) - $start
         ], $httpCode);
     }
 
@@ -91,36 +94,39 @@ class WelcomeController extends Controller
     public function addLeaf(Request $request)
     {
         $start = microtime(true);
+        $success = false;
+        $httpCode = 500;
 
-        try {
-            $root = \App\node::find(1);
-            $newLeaf = new \App\node();
-            $newLeaf->title = "add-leaf node";
+        $root = \App\node::find(1);
 
-            if (!$root->hasDescendants()) {
-                $root->addChild($newLeaf, 0);
-            } else {
-                $leaf = $this->getFirstLeaf($root);
-                $leaf->addChild($newLeaf, 0);
+        if (empty($root)) {
+            $message = "root does not exist";
+        } else {
+            try {
+                $newLeaf = new \App\node();
+                $newLeaf->title = "add-leaf node";
+
+                if (!$root->hasChildren()) {
+                    $root->addChild($newLeaf, 0);
+                } else {
+                    $leaf = $this->getFirstLeaf($root);
+                    $leaf->addChild($newLeaf, 0);
+                }
+
+                $success = true;
+                $httpCode = 200;
+                $message = "Leaf added";
+            } catch(\Exception $exception) {
+                $message = $exception->getMessage();
             }
-
-            $success = true;
-            $httpCode = 200;
-            $message = "Leaf added";
-        } catch(\Exception $exception) {
-            $success = false;
-            $httpCode = 500;
-            $message = $exception->getMessage();
         }
 
-        $addLeafTime = microtime(true) - $start;
-
         return response()->json([
+            'success' => $success,
+            'message' => $message,
             'root' => $root,
             'allCount' => $this->getCount($root),
-            'addLeafTime' => $addLeafTime,
-            'message' => $message,
-            'success' => $success
+            'time' => microtime(true) - $start,
         ], $httpCode);
     }
 
@@ -162,16 +168,27 @@ class WelcomeController extends Controller
      */
     public function getTree(Request $request)
     {
-        $root = \App\node::find(1);
         $start = microtime(true);
-        $tree = $root->getTree();
-        $fetchTreeTime = microtime(true) - $start;
+        $success = false;
+        $httpCode = 500;
 
+        $root = \App\node::find(1);
+
+        if (empty($root)) {
+            $message = "root does not exist";
+        } else {
+            $tree = $root->getTree();
+            $success = true;
+            $message = "tree fetched";
+            $httpCode = 200;
+        }
         return response()->json([
+            'success' => $success,
+            'message' => $message,
             'root' => $root,
             'tree' => $tree,
-            'fetchTreeTime' => $fetchTreeTime,
-            'allCount' => $this->getCount($root)
-        ]);
+            'allCount' => $this->getCount($root),
+            'time' => microtime(true) - $start
+        ], $httpCode);
     }
 }

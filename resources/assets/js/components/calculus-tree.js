@@ -43,7 +43,7 @@ export default {
         deleteLeaf() {
             axios.post('/tree/delete-leaf').then((response) => {
                 this.allCount = response.data.allCount;
-                this.deleteLeafTime = response.data.deleteLeafTime;
+                this.deleteLeafTime = response.data.time;
             }).catch((error) => {
                 console.log("something went wrong when deleting child ...");
                 console.log(error);
@@ -58,7 +58,7 @@ export default {
         addLeaf() {
             axios.post('/tree/add-leaf').then((response) => {
                 this.allCount = response.data.allCount;
-                this.addLeafTime = response.data.addLeafTime;
+                this.addLeafTime = response.data.time;
             }).catch((error) => {
                 console.log("something went wrong when adding child ...");
                 console.log(error);
@@ -73,7 +73,7 @@ export default {
             axios.get('/tree').then((response) => {
                 this.dataFetched = true;
                 this.allCount = response.data.allCount;
-                this.fetchTreeTime = response.data.fetchTreeTime;
+                this.fetchTreeTime = response.data.time;
             }).catch((error) => {
                 console.log("something went wrong when fetching data ...");
                 console.log(error);

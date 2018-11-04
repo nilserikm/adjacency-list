@@ -1,13 +1,13 @@
 <template>
     <div class="tree-container">
-        <h5 style="text-align: center;">Tree Data</h5>
+        <h1>Adjacency List Operations</h1>
 
         <!-- General statistics about the tree -->
         <div class="initial-data">
-            <p>Tree Stats</p>
+            <h2>Tree Stats</h2>
             <ul>
-                <li>Time to fetch tree: <span class="dataEntry">{{ fetchTreeTime }}</span></li>
-                <li>Number of nodes: <span class="dataEntry">{{ allCount }}</span></li>
+                <li>Time to fetch entire tree: <span class="dataEntry">{{ fetchTreeTime }}</span></li>
+                <li>Number of nodes in tree: <span class="dataEntry">{{ allCount }}</span></li>
             </ul>
         </div>
 
