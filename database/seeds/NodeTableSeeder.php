@@ -13,180 +13,61 @@ class NodeTableSeeder extends Seeder
     {
         $start = microtime(true);
 
-        // one project
+        $numBuildings = 3;
+        $numPhases = 3;
+        $numApartments = 0;
+        $numActivities = 0;
+
+        // LARGE VERSION
+        // level 0 node (root)
+        // "project"
         $root = new \App\node();
         $root->title = "root node";
         $root->save();
-        $root->addChildren([
-            // seven buildings
-            new \App\node(['title' => 'level1 node']),
-            new \App\node(['title' => 'level1 node']),
-            new \App\node(['title' => 'level1 node']),
-            new \App\node(['title' => 'level1 node']),
-            new \App\node(['title' => 'level1 node']),
-            new \App\node(['title' => 'level1 node']),
-            new \App\node(['title' => 'level1 node'])
-        ]);
 
-        $level1Children = $root->getChildren();
-        foreach ($level1Children as $level1Child) {
-            $level2Node = \App\node::find($level1Child->id);
-            $level2Node->addChildren([
-                // ten phases
-                new \App\node(['title' => 'level2 node']),
-                new \App\node(['title' => 'level2 node']),
-                new \App\node(['title' => 'level2 node']),
-                new \App\node(['title' => 'level2 node']),
-                new \App\node(['title' => 'level2 node']),
-                new \App\node(['title' => 'level2 node']),
-                new \App\node(['title' => 'level2 node']),
-                new \App\node(['title' => 'level2 node']),
-                new \App\node(['title' => 'level2 node']),
-                new \App\node(['title' => 'level2 node']),
-            ]);
+        // level 1 children
+        // "buildings"
+        $rootChildren = [];
+        for ($i = 0; $i < $numBuildings; $i++) {
+            $node = new \App\node(['title' => 'level1 node ' . $i]);
+            array_push($rootChildren, $node);
+        }
+        $root->addChildren($rootChildren);
 
-            $level2Children = $level2Node->getChildren();
-            foreach($level2Children as $level2Child) {
-                $level3Node = \App\node::find($level2Child->id);
-                $level3Node->addChildren([
-                    // fifty apartments
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                    new \App\node(['title' => 'level3 node']),
-                ]);
+        foreach ($root->getChildren() as $child) {
+            // level 2 children
+            // "phases"
+            $level1Children = [];
+            for ($i = 0; $i < $numPhases; $i++) {
+                $node = new \App\node(['title' => 'level2 node ' . $i]);
+                array_push($level1Children, $node);
+            }
+            $child->addChildren($level1Children);
 
-                $level3Children = $level3Node->getChildren();
-                foreach($level3Children as $level3Child) {
-                    $level4Node = \App\node::find($level3Child->id);
-                    $level4Node->addChildren([
-                        // thirty activities
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                        new \App\node(['title' => 'level4 node']),
-                    ]);
+            foreach($level1Children as $level1Child) {
+                // level 3 children
+                // "apartments"
+                $level2Children = [];
+                for ($i = 0; $i < $numApartments; $i++) {
+                    $node = new \App\node(['title' => 'level3 node ' . $i]);
+                    array_push($level2Children, $node);
+                }
+                $level1Child->addChildren($level2Children);
 
-//                    $level4Children = $level4Node->getChildren();
-//                    foreach($level4Children as $level4Child) {
-//                        $level5Node = \App\node::find($level4Child->id);
-//                        $level5Node->addChildren([
-//                            new \App\node(['title' => 'level5 node']),
-//                            new \App\node(['title' => 'level5 node']),
-//                            new \App\node(['title' => 'level5 node']),
-//                            new \App\node(['title' => 'level5 node']),
-//                            new \App\node(['title' => 'level5 node'])
-//                        ]);
-//
-//                        $level5Children = $level5Node->getChildren();
-//                        foreach($level5Children as $level5Child) {
-//                            $level6Node = \App\node::find($level5Child->id);
-//                            $level6Node->addChildren([
-//                                new \App\node(['title' => 'level6 node']),
-//                                new \App\node(['title' => 'level6 node']),
-//                                new \App\node(['title' => 'level6 node']),
-//                                new \App\node(['title' => 'level6 node']),
-//                                new \App\node(['title' => 'level6 node'])
-//                            ]);
-//                        }
-//                    }
+                foreach($level2Children as $level2Child) {
+                    // level 4 children
+                    // "activities"
+                    $level3Children = [];
+                    for ($i = 0; $i < $numActivities; $i++) {
+                        $node = new \App\node(['title' => 'level4 node ' . $i]);
+                        array_push($level3Children, $node);
+                    }
+                    $level2Child->addChildren($level3Children);
                 }
             }
+            $end = microtime(true);
         }
 
-        $end = microtime(true) - $start;
-
-        $insertStart = microtime(true);
-        $node = \App\node::find(2);
-        $node->addChild(new \App\node(['title' => 'test insert']));
-        $insertEnd = microtime(true) - $insertStart;
-
-        $moveStart = microtime(true);
-        $sibling = $node->getFirstSibling();
-        $node->moveTo(0, $sibling);
-        $moveEnd = microtime(true) - $moveStart;
-
-        $deleteStart = microtime(true);
-        $node1 = \App\node::find(3);
-        $parent = $node1->getParent();
-        $parent->removeChild($node1->position);
-        $deleteEnd = microtime(true) - $deleteStart;
-
-        $this->command->info("bulk time: " . $end);
-        $this->command->info("insert time: " . $insertEnd);
-        $this->command->info("delete time: " . $deleteEnd);
-        $this->command->info("move time: " . $moveEnd);
+        $this->command->info("migration time: " . ($end - $start));
     }
 }
