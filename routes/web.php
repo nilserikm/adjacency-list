@@ -18,3 +18,4 @@ Route::get('/smaller', function() {
 Route::get('/tree', 'WelcomeController@getTree');
 Route::post('/tree/add-leaf', 'WelcomeController@addLeaf');
 Route::post('/tree/delete-leaf', 'WelcomeController@deleteLeaf');
+Route::post('/tree/delete-node-with-children', 'WelcomeController@deleteNodeWithChildren');

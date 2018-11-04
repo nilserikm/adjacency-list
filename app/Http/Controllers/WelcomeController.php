@@ -7,6 +7,24 @@ use Illuminate\Http\Request;
 
 class WelcomeController extends Controller
 {
+    public function deleteNodeWithChildren(Request $request)
+    {
+        $start = microtime(true);
+        $success = true;
+        $message = "delete node with children";
+        $httpCode = 200;
+
+        $root = \App\node::find(1);
+        $time = microtime(true) - $start;
+
+        return response()->json([
+            'success' => $success,
+            'message' => $message,
+            'allCount' => $this->getCount($root),
+            'time' => $time
+        ], $httpCode);
+    }
+
     /**
      * Deletes the first found leaf on the left-hand side
      * @param Request $request
@@ -36,7 +54,7 @@ class WelcomeController extends Controller
         return response()->json([
             'success' => $success,
             'message' => $message,
-            'allCount' => $root->countDescendants(),
+            'allCount' => $this->getCount($root),
             'deleteLeafTime' => $deleteLeafTime
         ], $httpCode);
     }
@@ -76,7 +94,7 @@ class WelcomeController extends Controller
 
         return response()->json([
             'root' => $root,
-            'allCount' => $root->countDescendants(),
+            'allCount' => $this->getCount($root),
             'addLeafTime' => $addLeafTime,
             'message' => $message,
             'success' => $success

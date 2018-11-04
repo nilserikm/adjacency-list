@@ -1,6 +1,8 @@
 <template>
     <div class="tree-container">
         <h5 style="text-align: center;">Tree Data</h5>
+
+        <!-- General statistics about the tree -->
         <div class="initial-data">
             <p>Tree Stats</p>
             <ul>
@@ -9,6 +11,7 @@
             </ul>
         </div>
 
+        <!-- Add a leaf section -->
         <div class="tree-section add-child">
             <button
                 type="button"
@@ -17,9 +20,10 @@
             >
                 Add child
             </button>
-            <p>Time to add child: <span class="dataEntry">{{ addLeafTime === null ? "No process ..." : addLeafTime }}</span></p>
+            <p>Time to add leaf: <span class="dataEntry">{{ addLeafTime === null ? "No process ..." : addLeafTime }}</span></p>
         </div>
 
+        <!-- Delete a leaf section -->
         <div class="tree-section delete-child">
             <button
                 type="button"
@@ -28,7 +32,19 @@
             >
                 Delete child
             </button>
-            <p>Time to delete child: <span class="dataEntry">{{ deleteLeafTime === null ? "No process ..." : deleteLeafTime }}</span></p>
+            <p>Time to delete leaf: <span class="dataEntry">{{ deleteLeafTime === null ? "No process ..." : deleteLeafTime }}</span></p>
+        </div>
+
+        <!-- Delete a node with its children section -->
+        <div class="tree-section delete-child">
+            <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                @click="deleteNodeWithChildren"
+            >
+                Delete child
+            </button>
+            <p>Time to delete node with children: <span class="dataEntry">{{ deleteNodeWithChildrenTime === null ? "No process ..." : deleteNodeWithChildrenTime }}</span></p>
         </div>
     </div>
 </template>
