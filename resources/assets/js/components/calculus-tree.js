@@ -11,8 +11,11 @@ export default {
             addRootChildTime: null,
             allCount: null,
             deleteLeafTime: null,
+            deleteByIdTime: null,
             deleteNodeWithChildrenTime: null,
-            fetchTreeTime: null
+            feedback: "",
+            fetchTreeTime: null,
+            nodeId: null
         }
     },
 
@@ -22,6 +25,26 @@ export default {
 
     methods: {
         /**
+         * Deletes a node and its children/descendants by it's id
+         * @returns {void}
+         */
+        deleteById() {
+            if (isNaN(parseInt(this.nodeId))) {
+                this.setFeedback("No node ID specified ...");
+            } else {
+                let data = { 'nodeId': this.nodeId };
+
+                axios.post('/tree/delete-by-id', data).then((response) => {
+                    this.deleteByIdTime = response.data.time;
+                    this.nodeId = "";
+                    this.setFeedback(response.data.message);
+                }).catch((error) => {
+                    this.setFeedback(error.response.data.message);
+                });
+            }
+        },
+
+        /**
          * Adds another child to the root node
          * @returns {void}
          */
@@ -30,8 +53,9 @@ export default {
                 console.log(response);
                 this.allCount = response.data.allCount;
                 this.addRootChildTime = response.data.time;
+                this.setFeedback(response.data.message);
             }).catch((error) => {
-                console.log("something went wrong when adding root child ...");
+                this.setFeedback(error.response.data.message);
                 console.log(error);
             });
         },
@@ -45,8 +69,9 @@ export default {
                 console.log("deleted node id: ", response.data.deletedNodeId);
                 this.allCount = response.data.allCount;
                 this.deleteNodeWithChildrenTime = response.data.time;
+                this.setFeedback(response.data.message);
             }).catch((error) => {
-                console.log("something went wrong when deleting node with children ...");
+                this.setFeedback(error.response.data.message);
                 console.log(error);
             });
         },
@@ -59,8 +84,9 @@ export default {
             axios.post('/tree/delete-leaf').then((response) => {
                 this.allCount = response.data.allCount;
                 this.deleteLeafTime = response.data.time;
+                this.setFeedback(response.data.message);
             }).catch((error) => {
-                console.log("something went wrong when deleting child ...");
+                this.setFeedback(error.response.data.message);
                 console.log(error);
             });
         },
@@ -74,8 +100,9 @@ export default {
             axios.post('/tree/add-leaf').then((response) => {
                 this.allCount = response.data.allCount;
                 this.addLeafTime = response.data.time;
+                this.setFeedback(response.data.message);
             }).catch((error) => {
-                console.log("something went wrong when adding child ...");
+                this.setFeedback(error.response.data.message);
                 console.log(error);
             });
         },
@@ -89,10 +116,20 @@ export default {
                 this.dataFetched = true;
                 this.allCount = response.data.allCount;
                 this.fetchTreeTime = response.data.time;
+                this.setFeedback(response.data.message);
             }).catch((error) => {
-                console.log("something went wrong when fetching data ...");
+                this.setFeedback(error.response.data.message);
                 console.log(error);
             });
+        },
+
+        /**
+         * Sets the error message
+         * @param message
+         * @returns {void}
+         */
+        setFeedback(message) {
+            this.feedback = message;
         }
     },
 

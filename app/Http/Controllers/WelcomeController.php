@@ -8,6 +8,47 @@ use Illuminate\Http\Request;
 class WelcomeController extends Controller
 {
     /**
+     * Deletes a node and its children and descendants
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteById(Request $request)
+    {
+        $start = microtime(true);
+        $success = false;
+        $httpCode = 500;
+        $root = \App\node::find(1);
+        $node = \App\node::find($request->input('nodeId'));
+
+        if (empty($root)) {
+            $message = "root does not exist";
+        } else if (is_null($request->input('nodeId'))) {
+            $message = "node id cannot be null";
+        } else if (is_null($node)) {
+            $message = "node not found (" . $request->input('nodeId') . ")";
+        } else {
+            try {
+                $node->deleteSubtree(true);
+
+                $success = true;
+                $httpCode = 200;
+                $message = "Node deleted ...";
+            } catch(\Exception $exception) {
+                $message = $exception->getMessage();
+                $httpCode = $exception->getCode();
+            }
+        }
+
+        return response()->json([
+            'success' => $success,
+            'message' => $message,
+            'allCount' => $this->getCount($root),
+            'nodeId' => $request->input('nodeId'),
+            'time' => microtime(true) - $start
+        ], $httpCode);
+    }
+
+    /**
      * Adds a new right-hand child to the root node
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -34,7 +75,7 @@ class WelcomeController extends Controller
                     $root->addChild($newChild, $position);
                 }
 
-                $message = "root child should be added now ...";
+                $message = "Root child added ...";
                 $httpCode = 200;
                 $success = true;
             } catch(\Exception $exception) {
@@ -70,10 +111,8 @@ class WelcomeController extends Controller
         } else {
             try {
                 $deleteNode = $root->getChildren()[0];
-//                $deletedNodeName = $deleteNode->title;
-//                $deletedNodeId = $deleteNode->id;
                 $deleteNode->deleteSubtree(true);
-                $message = "subtree should be deleted now ...";
+                $message = "Root child's subtree deleted ...";
                 $httpCode = 200;
                 $success = true;
             } catch(\Exception $exception) {
@@ -86,8 +125,6 @@ class WelcomeController extends Controller
             'success' => $success,
             'message' => $message,
             'allCount' => $this->getCount($root),
-//            'deletedNodeName' => is_null($deletedNodeName) ? null : $deletedNodeName,
-//            'deletedNodeId' => is_null($deletedNodeId) ? null : $deletedNodeId,
             'time' => microtime(true) - $start
         ], $httpCode);
     }
@@ -115,7 +152,7 @@ class WelcomeController extends Controller
                 $parent->removeChild($leaf->position);
                 $success = true;
                 $httpCode = 200;
-                $message = "Leaf deleted";
+                $message = "Leaf deleted ...";
             } catch(\Exception $exception) {
                 $message = $exception->getMessage();
             }
@@ -159,7 +196,7 @@ class WelcomeController extends Controller
 
                 $success = true;
                 $httpCode = 200;
-                $message = "Leaf added";
+                $message = "Leaf added ...";
             } catch(\Exception $exception) {
                 $message = $exception->getMessage();
             }
@@ -223,7 +260,7 @@ class WelcomeController extends Controller
         } else {
             $tree = $root->getTree();
             $success = true;
-            $message = "tree fetched";
+            $message = "Tree data fetched ...";
             $httpCode = 200;
         }
         return response()->json([
