@@ -13,10 +13,10 @@ class NodeTableSeeder extends Seeder
     {
         $start = microtime(true);
 
-        $numBuildings = 3;
-        $numPhases = 3;
-        $numApartments = 0;
-        $numActivities = 0;
+        $numBuildings = 5;
+        $numPhases = 5;
+        $numApartments = 7;
+        $numActivities = 10;
 
         // LARGE VERSION
         // level 0 node (root)

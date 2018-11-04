@@ -83,7 +83,7 @@ class WelcomeController extends Controller
             $root->addChild($copy, $node->position);
 
             if ($node->hasChildren()) {
-                $this->duplicateTree($node);
+                $this->duplicateTree($node, $node->getDescendantsTree());
             }
         }
     }
