@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 class WelcomeController extends Controller
 {
     /**
-     * Duplicates the root's last child to the right of that last child
+     * Duplicates the corresponding node by id
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -26,12 +26,14 @@ class WelcomeController extends Controller
         } else if (is_null($node)) {
             $message = "Node not found (" . $request->input('duplicateId') . ") ...";
         } else {
-            if (!$this->duplicateNode($node)) {
-                $message = "Something went wrong when trying to duplicate the node ...";
-            } else {
+            try {
+                $this->duplicateNode($node);
                 $message = "Node duplicated ...";
                 $success = true;
                 $httpCode = 200;
+            } catch(\Exception $exception) {
+                $message = $exception->getMessage();
+                $httpCode = $exception->getCode();
             }
         }
 
@@ -48,6 +50,7 @@ class WelcomeController extends Controller
      * Returns true if the node was duplicated properly, false otherwise
      * @param node $node
      * @return boolean
+     * @throws \Exception
      */
     public function duplicateNode(\App\node $node)
     {
@@ -60,30 +63,35 @@ class WelcomeController extends Controller
                 $clone = new \App\node();
                 $clone->title = "clone " . $node->title;
                 $node->addSibling($clone);
-                $tree = $node->getDescendantsTree();
-                $this->duplicateTree($clone, $tree);
+                $children = $node->getChildren();
+                $this->duplicateTree($clone, $children);
             }
         } else {
             if (!$node->hasChildren()) {
-                dd("node IS root, NO children");
+                throw new \Exception("Node IS root, NO children", 501);
             } else {
-                dd("node is NOT root, HAS children");
+                throw new \Exception("node is root, HAS children", 501);
             }
         }
 
         return true;
     }
 
-    public function duplicateTree(\App\node $root, Collection $tree)
+    /**
+     * Recursively takes the base's childrens and creates copy of them and
+     * adds the returned copy as a children to the base
+     * @param node $base
+     * @param Collection $children
+     */
+    public function duplicateTree(\App\node $base, Collection $children)
     {
-        foreach($tree as $node) {
+        foreach($children as $child) {
             $copy = new \App\node();
-            $copy->title = $node->title;
+            $copy->title = $child->title;
+            $returnedCopy = $base->addChild($copy, $child->position, true);
 
-            $root->addChild($copy, $node->position);
-
-            if ($node->hasChildren()) {
-                $this->duplicateTree($node, $node->getDescendantsTree());
+            if ($child->hasChildren()) {
+                $this->duplicateTree($returnedCopy, $child->getChildren());
             }
         }
     }
