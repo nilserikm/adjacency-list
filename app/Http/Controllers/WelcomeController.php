@@ -146,7 +146,8 @@ class WelcomeController extends Controller
             'message' => $message,
             'allCount' => $this->getCount($root),
             'deleteId' => $request->input('deleteId'),
-            'time' => microtime(true) - $start
+            'time' => microtime(true) - $start,
+            'node' => !empty($node) ? $node : null
         ], $httpCode);
     }
 
@@ -190,7 +191,8 @@ class WelcomeController extends Controller
             'success' => $success,
             'message' => $message,
             'allCount' => $this->getCount($root),
-            'time' => microtime(true) - $start
+            'time' => microtime(true) - $start,
+            'node' => !empty($newChild) ? $newChild : null
         ], $httpCode);
     }
 
@@ -227,7 +229,8 @@ class WelcomeController extends Controller
             'success' => $success,
             'message' => $message,
             'allCount' => $this->getCount($root),
-            'time' => microtime(true) - $start
+            'time' => microtime(true) - $start,
+            'node' => !empty($deleteNode) ? $deleteNode : null
         ], $httpCode);
     }
 
@@ -264,7 +267,8 @@ class WelcomeController extends Controller
             'success' => $success,
             'message' => $message,
             'allCount' => $this->getCount($root),
-            'time' => microtime(true) - $start
+            'time' => microtime(true) - $start,
+            'node' => !empty($leaf) ? $leaf : null
         ], $httpCode);
     }
 
@@ -310,6 +314,7 @@ class WelcomeController extends Controller
             'root' => $root,
             'allCount' => $this->getCount($root),
             'time' => microtime(true) - $start,
+            'node' => !empty($newLeaf) ? $newLeaf : null
         ], $httpCode);
     }
 

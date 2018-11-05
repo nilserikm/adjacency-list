@@ -10,6 +10,7 @@ export default {
             addLeafTime: null,
             addRootChildTime: null,
             allCount: null,
+            countDifference: null,
             deleteLeafTime: null,
             deleteByIdTime: null,
             deleteId: null,
@@ -39,6 +40,7 @@ export default {
                 let data = { 'duplicateId': this.duplicateId };
 
                 axios.post('/tree/duplicate-by-id', data).then((response) => {
+                    this.countDifference = response.data.allCount - this.allCount;
                     this.allCount = response.data.allCount;
                     this.duplicateByIdTime = response.data.time;
                     this.duplicateId = "";
@@ -63,10 +65,13 @@ export default {
                 let data = { 'deleteId': this.deleteId };
 
                 axios.post('/tree/delete-by-id', data).then((response) => {
+                    this.countDifference = response.data.allCount - this.allCount;
                     this.deleteByIdTime = response.data.time;
                     this.deleteId = "";
                     this.allCount = response.data.allCount;
-                    this.setFeedback(response.data.message);
+
+                    let message = response.data.message + " (id: " + response.data.node.id + ")";
+                    this.setFeedback(message);
                 }).catch((error) => {
                     this.deleteId = "";
                     this.setFeedback(error.response.data.message, 'error');
@@ -83,7 +88,9 @@ export default {
                 console.log(response);
                 this.allCount = response.data.allCount;
                 this.addRootChildTime = response.data.time;
-                this.setFeedback(response.data.message);
+
+                let message = response.data.message + " (id: " + response.data.node.id + ")";
+                this.setFeedback(message);
             }).catch((error) => {
                 this.setFeedback(error.response.data.message, 'error');
                 console.log(error);
@@ -98,7 +105,9 @@ export default {
             axios.post('/tree/delete-node-with-children').then((response) => {
                 this.allCount = response.data.allCount;
                 this.deleteNodeWithChildrenTime = response.data.time;
-                this.setFeedback(response.data.message);
+
+                let message = response.data.message + " (id: " + response.data.node.id + ")";
+                this.setFeedback(message);
             }).catch((error) => {
                 this.setFeedback(error.response.data.message, 'error');
                 console.log(error);
@@ -113,7 +122,9 @@ export default {
             axios.post('/tree/delete-leaf').then((response) => {
                 this.allCount = response.data.allCount;
                 this.deleteLeafTime = response.data.time;
-                this.setFeedback(response.data.message);
+
+                let message = response.data.message + " (id: " + response.data.node.id + ")";
+                this.setFeedback(message);
             }).catch((error) => {
                 this.setFeedback(error.response.data.message, 'error');
                 console.log(error);
@@ -129,7 +140,9 @@ export default {
             axios.post('/tree/add-leaf').then((response) => {
                 this.allCount = response.data.allCount;
                 this.addLeafTime = response.data.time;
-                this.setFeedback(response.data.message);
+
+                let message = response.data.message + " (id: " + response.data.node.id + ")";
+                this.setFeedback(message);
             }).catch((error) => {
                 this.setFeedback(error.response.data.message, 'error');
                 console.log(error);
@@ -176,6 +189,21 @@ export default {
          */
         loading() {
             return !this.dataFetched;
+        },
+
+        /**
+         * Returns true if the plus-sign before countDifference should be
+         * displayed
+         * @returns {boolean}
+         */
+        showPlus() {
+            if (this.countDifference !== null) {
+                if (Math.sign(this.countDifference) === 1) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

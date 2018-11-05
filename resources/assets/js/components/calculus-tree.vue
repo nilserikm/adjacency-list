@@ -7,7 +7,21 @@
             <h2>Tree Stats</h2>
             <ul>
                 <li>Time to fetch entire tree: <span class="dataEntry">{{ fetchTreeTime }}</span></li>
-                <li>Number of nodes in tree: <span class="dataEntry">{{ allCount }}</span></li>
+                <li>Number of nodes in tree:
+                    <span class="dataEntry">{{ allCount }}</span>
+                    <span
+                        v-if="countDifference !== null"
+                        class="count-difference"
+                    >
+                        (
+                        <span
+                            class="plus-sign"
+                            v-if="showPlus">+</span
+                        >
+                        {{ countDifference }}
+                        )
+                    </span>
+                </li>
                 <li>Feedback: <span class="dataEntry" v-bind:class="{ error : feedbackError }">{{ feedback }}</span></li>
             </ul>
         </div>
@@ -53,7 +67,7 @@
                 class="btn btn-primary btn-sm"
                 @click="addLeaf"
             >
-                Add child
+                Add leaf
             </button>
             <p>Time to add leaf: <span class="dataEntry">{{ addLeafTime === null ? "No process ..." : addLeafTime }}</span></p>
         </div>
@@ -89,7 +103,9 @@
             >
                 Delete leaf
             </button>
-            <p>Time to delete leaf: <span class="dataEntry">{{ deleteLeafTime === null ? "No process ..." : deleteLeafTime }}</span></p>
+            <p>Time to delete leaf:
+                <span class="dataEntry">{{ deleteLeafTime === null ? "No process ..." : deleteLeafTime }}</span>
+            </p>
         </div>
 
         <!-- Delete a node with its children section -->
@@ -99,14 +115,25 @@
                 class="btn btn-primary btn-sm"
                 @click="deleteNodeWithChildren"
             >
-                Delete child
+                Delete root child with subtree
             </button>
-            <p>Time to delete node with children: <span class="dataEntry">{{ deleteNodeWithChildrenTime === null ? "No process ..." : deleteNodeWithChildrenTime }}</span></p>
+            <p>Time to delete root child with subtree:
+                <span class="dataEntry">{{ deleteNodeWithChildrenTime === null ? "No process ..." : deleteNodeWithChildrenTime }}</span>
+            </p>
         </div>
     </div>
 </template>
 
 <style lang="scss">
+    .count-difference {
+        padding-right: 10px;
+    }
+
+    .plus-sign {
+        margin: 0;
+        padding: 0;
+    }
+
     .dataEntry {
         font-weight: bold;
     }
