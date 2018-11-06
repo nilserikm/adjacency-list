@@ -27,7 +27,7 @@ class WelcomeController extends Controller
             $message = "Node not found (" . $request->input('duplicateId') . ") ...";
         } else {
             try {
-                $this->duplicateNode($node);
+                $baseClone = $this->duplicateNode($node);
                 $message = "Node duplicated ...";
                 $success = true;
                 $httpCode = 200;
@@ -42,29 +42,33 @@ class WelcomeController extends Controller
             'message' => $message,
             'allCount' => $this->getCount($root),
             'time' => microtime(true) - $start,
-            'treeDesc' => is_null($node) ? null : $node->getDescendantsTree()
+            'treeDesc' => is_null($node) ? null : $node->getDescendantsTree(),
+            'node' => !empty($baseClone) ? $baseClone : null
         ], $httpCode);
     }
 
     /**
-     * Returns true if the node was duplicated properly, false otherwise
+     * Returns null if the tree duplication does not work, and returns an
+     * instance of \App\node (the baseClone) otherwise
      * @param node $node
-     * @return boolean
+     * @return null|\App\node $baseClone
      * @throws \Exception
      */
     public function duplicateNode(\App\node $node)
     {
+        $baseClone = null;
+
         if (!$node->isRoot()) {
             if (!$node->hasChildren()) {
-                $clone = new \App\node();
-                $clone->title = "clone " . $node->title;
-                $node->addSibling($clone);
+                $baseClone = new \App\node();
+                $baseClone->title = "clone " . $node->title;
+                $node->addSibling($baseClone);
             } else {
-                $clone = new \App\node();
-                $clone->title = "clone " . $node->title;
-                $node->addSibling($clone);
+                $baseClone = new \App\node();
+                $baseClone->title = "clone " . $node->title;
+                $node->addSibling($baseClone);
                 $children = $node->getChildren();
-                $this->duplicateTree($clone, $children);
+                $this->duplicateTree($baseClone, $children);
             }
         } else {
             if (!$node->hasChildren()) {
@@ -74,7 +78,7 @@ class WelcomeController extends Controller
             }
         }
 
-        return true;
+        return $baseClone;
     }
 
     /**

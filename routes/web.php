@@ -15,6 +15,10 @@ Route::get('/smaller', function() {
     return view('small-tree');
 });
 
+Route::get('/node-calculation', function() {
+    return view('node-calculation');
+});
+
 Route::get('/tree', 'WelcomeController@getTree');
 Route::post('/tree/add-root-child', 'WelcomeController@addRootChild');
 Route::post('/tree/add-leaf', 'WelcomeController@addLeaf');

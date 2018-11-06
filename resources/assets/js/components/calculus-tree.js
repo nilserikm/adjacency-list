@@ -44,8 +44,9 @@ export default {
                     this.allCount = response.data.allCount;
                     this.duplicateByIdTime = response.data.time;
                     this.duplicateId = "";
-                    this.setFeedback(response.data.message);
-                    console.log(response.data.treeDesc);
+
+                    let message = response.data.message + " (id: " + response.data.node.id + ")";
+                    this.setFeedback(message);
                 }).catch((error) => {
                     this.duplicateId = "";
                     this.setFeedback(error.response.data.message, 'error');

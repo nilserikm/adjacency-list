@@ -15,8 +15,9 @@ class NodeTableSeeder extends Seeder
 
         $numBuildings = 5;
         $numPhases = 5;
-        $numApartments = 7;
-        $numActivities = 10;
+        $numApartments = 20;
+        $numActivities = 20;
+        $numLeaves = 0;
 
         // LARGE VERSION
         // level 0 node (root)
@@ -63,10 +64,22 @@ class NodeTableSeeder extends Seeder
                         array_push($level3Children, $node);
                     }
                     $level2Child->addChildren($level3Children);
+
+                    foreach($level3Children as $level3Child) {
+                        // level 5 children
+                        // "leaves"
+                        $level4Children = [];
+                        for ($i = 0; $i < $numLeaves; $i++) {
+                            $node = new \App\node(['title' => 'level5 node ' . $i]);
+                            array_push($level4Children, $node);
+                        }
+                        $level3Child->addChildren($level4Children);
+                    }
                 }
             }
-            $end = microtime(true);
         }
+
+        $end = microtime(true);
 
         $this->command->info("migration time: " . ($end - $start));
     }
