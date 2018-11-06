@@ -68,10 +68,32 @@
             />
         </div>
 
+        <div class="node-result number-level-4">
+            <label>Number of Nodes: Level 4</label>
+            <input
+                ref="level4Nodes"
+                class="form-control"
+                type="number"
+                v-model="level4Nodes"
+                disabled
+            >
+        </div>
+
+        <div class="node-result number-level-3">
+            <label>Number of Nodes: Level 3</label>
+            <input
+                ref="level3Nodes"
+                class="form-control"
+                type="number"
+                v-model="level3Nodes"
+                disabled
+            >
+        </div>
+
         <div class="node-result number-root-child">
             <label>Number of Nodes: Root child</label>
             <input
-                ref="numberOfNodes"
+                ref="rootChildNodes"
                 class="form-control"
                 type="number"
                 v-model="rootChildNodes"

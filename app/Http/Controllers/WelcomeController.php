@@ -28,9 +28,14 @@ class WelcomeController extends Controller
         } else {
             try {
                 $baseClone = $this->duplicateNode($node);
-                $message = "Node duplicated ...";
-                $success = true;
-                $httpCode = 200;
+
+                if (!is_null($baseClone)) {
+                    $message = "Node duplicated ...";
+                    $success = true;
+                    $httpCode = 200;
+                } else {
+                    $message = "Something went wrong when running duplicateNode ...";
+                }
             } catch(\Exception $exception) {
                 $message = $exception->getMessage();
                 $httpCode = $exception->getCode();
