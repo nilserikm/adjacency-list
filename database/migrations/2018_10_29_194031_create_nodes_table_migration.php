@@ -13,6 +13,7 @@ class CreateNodesTableMigration extends Migration
             $table->integer('position', false, true);
             $table->integer('real_depth', false, true);
             $table->string('title');
+            $table->unsignedInteger('estimate')->default(0);
             $table->softDeletes();
 
             $table->foreign('parent_id')

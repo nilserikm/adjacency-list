@@ -4,6 +4,8 @@ use Illuminate\Database\Seeder;
 
 class NodeTableSeeder extends Seeder
 {
+    const ESTIMATE = 200;
+
     /**
      * Run the database seeds.
      *
@@ -16,10 +18,13 @@ class NodeTableSeeder extends Seeder
         // seed time ~20s
         // node count ~3.5k
         // number of buildings matches number of entries in buildingNames
-        $buildingNames = ["H6-H10"];
+        $buildingNames = ["H6-H10", "R-11", "R-3"];
         $numPhases = 7;
-        $numApartments = 20;
-        $numActivities = 25;
+        $numApartments = 2;
+        $numActivities = 2;
+//        $numPhases = 7;
+//        $numApartments = 20;
+//        $numActivities = 25;
         $numUnnamedFirst = 0;
         $numUnnamedSecond = 0;
 
@@ -27,13 +32,17 @@ class NodeTableSeeder extends Seeder
             // "building"
             $root = new \App\node();
             $root->title = $buildingName;
+            $root->estimate = self::ESTIMATE;
             $root->save();
 
             // "phases"
             $rootChildren = [];
             $phases = ["Rigg og drift", "Tett hus", "Utvendig", "Innvendig", "Innredning", "Ikke-navngitt fase", "Elementproduksjon"];
             for ($i = 0; $i < $numPhases; $i++) {
-                $node = new \App\node(['title' => $phases[$i]]);
+                $node = new \App\node([
+                    'title' => $phases[$i],
+                    'estimate' => self::ESTIMATE
+                ]);
                 array_push($rootChildren, $node);
             }
             $root->addChildren($rootChildren);
@@ -48,7 +57,10 @@ class NodeTableSeeder extends Seeder
                         $num = $i;
                     }
 
-                    $node = new \App\node(['title' => 'H01' . $num]);
+                    $node = new \App\node([
+                        'title' => 'H01' . $num,
+                        'estimate' => self::ESTIMATE
+                    ]);
                     array_push($level1Children, $node);
                 }
                 $child->addChildren($level1Children);
@@ -70,7 +82,10 @@ class NodeTableSeeder extends Seeder
                             $activities = "Ikke-navngitt aktivitet";
                         }
 
-                        $node = new \App\node(['title' => $activity]);
+                        $node = new \App\node([
+                            'title' => $activity,
+                            'estimate' => self::ESTIMATE
+                        ]);
                         array_push($level2Children, $node);
                     }
                     $level1Child->addChildren($level2Children);
@@ -80,7 +95,10 @@ class NodeTableSeeder extends Seeder
                         // "activities"
                         $level3Children = [];
                         for ($i = 0; $i < $numUnnamedFirst; $i++) {
-                            $node = new \App\node(['title' => 'level4 node ' . $i]);
+                            $node = new \App\node([
+                                'title' => 'level4 node ' . $i,
+                                'estimate' => self::ESTIMATE
+                            ]);
                             array_push($level3Children, $node);
                         }
                         $level2Child->addChildren($level3Children);
@@ -90,7 +108,10 @@ class NodeTableSeeder extends Seeder
                             // "leaves"
                             $level4Children = [];
                             for ($i = 0; $i < $numUnnamedSecond; $i++) {
-                                $node = new \App\node(['title' => 'level5 node ' . $i]);
+                                $node = new \App\node([
+                                    'title' => 'level5 node ' . $i,
+                                    'estimate' => self::ESTIMATE
+                                ]);
                                 array_push($level4Children, $node);
                             }
                             $level3Child->addChildren($level4Children);
