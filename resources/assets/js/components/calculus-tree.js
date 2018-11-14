@@ -153,9 +153,6 @@ export default {
                 let data = { 'duplicateId': this.duplicateId };
 
                 axios.post('/tree/duplicate-by-id', data).then((response) => {
-                    this.countDifference = response.data.allCount - this.allCount;
-                    this.allCount = response.data.allCount;
-                    this.duplicateByIdTime = response.data.time;
                     this.duplicateId = "";
                     this.setData(response, ((performance.now() - t0) / 1000));
                 }).catch((error) => {
