@@ -24,11 +24,15 @@ export default {
             duplicateId: null,
             feedback: "",
             feedbackError: false,
+            loading: false,
+            randomNodeInfo: null,
             timing: {
                 backend: null,
                 frontend: null
             },
-            randomNodeInfo: null
+            trees: [],
+            tree: null,
+            root: null
         }
     },
 
@@ -78,6 +82,7 @@ export default {
                 axios.post(url, data).then((response) => {
                     this.copyNodeChainedId = null;
                     this.copyNodeChainedParentId = null;
+                    this.trees = response.data.trees;
                     this.setData(response, (((performance.now() - t0) / 1000)));
                 }).catch((error) => {
                     this.copyNodeChainedId = null;
@@ -175,11 +180,7 @@ export default {
                 let data = { 'deleteId': this.deleteId };
 
                 axios.post('/tree/delete-by-id', data).then((response) => {
-                    this.countDifference = response.data.allCount - this.allCount;
-                    this.deleteByIdTime = response.data.time;
                     this.deleteId = "";
-                    this.allCount = response.data.allCount;
-
                     this.setData(response, ((performance.now() - t0) / 1000));
                 }).catch((error) => {
                     this.deleteId = "";
@@ -265,6 +266,9 @@ export default {
         fetchData() {
             let t0 = performance.now();
             axios.get('/tree').then((response) => {
+                this.trees = response.data.trees;
+                this.tree = response.data.tree;
+                this.root = this.tree[0];
                 this.dataFetched = true;
                 this.setData(response, ((performance.now() - t0) / 1000));
             }).catch((error) => {
@@ -291,12 +295,8 @@ export default {
     },
 
     computed: {
-        /**
-         * Returns true if the application is loading, false otherwise
-         * @returns {boolean}
-         */
-        loading() {
-            return !this.dataFetched;
+        modalityMode() {
+            return !this.dataFetched || this.loading;
         },
 
         /**

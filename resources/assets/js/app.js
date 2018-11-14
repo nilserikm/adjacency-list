@@ -17,6 +17,7 @@ window.Vue = require('vue');
 
 Vue.component('calculus-tree', require('./components/calculus-tree.vue'));
 Vue.component('node-calculation', require('./components/node-calculation.vue'));
+Vue.component('node', require('./components/node.vue'));
 
 const app = new Vue({
     el: '#app'
