@@ -10,6 +10,9 @@ export default {
             addLeafTime: null,
             addRootChildTime: null,
             allCount: null,
+            appendId: null,
+            copyNodeId: null,
+            copyNodeParentId: null,
             countDifference: null,
             deleteLeafTime: null,
             deleteByIdTime: null,
@@ -19,7 +22,11 @@ export default {
             duplicateId: null,
             feedback: "",
             feedbackError: false,
-            fetchTreeTime: null,
+            timing: {
+                backend: null,
+                frontend: null
+            },
+            randomNodeInfo: null
         }
     },
 
@@ -28,11 +35,90 @@ export default {
     },
 
     methods: {
+        copyNode() {
+            if (isNaN(parseInt(this.copyNodeId)) || isNaN(parseInt(this.copyNodeParentId))) {
+                this.copyNodeId = null;
+                this.copyNodeParentId = null;
+                this.setFeedback("No node ID specified ...", 'error');
+            } else {
+                let t0 = performance.now();
+                let url = "/node/copy";
+                let data = {
+                    'nodeId': this.copyNodeId,
+                    'parentId': this.copyNodeParentId
+                };
+
+                axios.post(url, data).then((response) => {
+                    this.copyNodeId = null;
+                    this.copyNodeParentId = null;
+                    this.setData(response, (((performance.now() - t0) / 1000)));
+                }).catch((error) => {
+                    this.copyNodeId = null;
+                    this.copyNodeParentId = null;
+                    this.setFeedback(error.response.data.message, 'error');
+                });
+            }
+        },
+
+        appendNode() {
+            if (isNaN(parseInt(this.appendId))) {
+                this.appendId = null;
+                this.setFeedback("No node ID specified ...", 'error');
+            } else {
+                let t0 = performance.now();
+                let url = "/node/append";
+                let data = { 'nodeId': this.appendId };
+
+                axios.post(url, data).then((response) => {
+                    this.appendId = null;
+                    this.setData(response, (((performance.now() - t0) / 1000)));
+                }).catch((error) => {
+                    this.appendId = null;
+                    this.setFeedback(error.response.data.message, 'error');
+                });
+            }
+        },
+
+        setData(response, frontendTime) {
+            this.countDifference = response.data.allCount - this.allCount;
+            this.allCount = response.data.allCount;
+            this.timing.backend = response.data.time;
+            this.timing.frontend = frontendTime;
+            this.setFeedback(response.data.message);
+        },
+
+        randomNode() {
+            let t0 = performance.now();
+            let url = "/node/random/node";
+            let data = {};
+
+            axios.post(url, data).then((response) => {
+                this.randomNodeInfo = response.data.node;
+                this.setData(response, (((performance.now() - t0) / 1000)));
+            }).catch((error) => {
+                this.setFeedback(error.response.data.message, 'error');
+            });
+        },
+
+        randomLeaf() {
+            let t0 = performance.now();
+            let url = "/node/random/leaf";
+            let data = {};
+
+            axios.post(url, data).then((response) => {
+                this.randomNodeInfo = response.data.node;
+                this.setData(response, ((performance.now() - t0) / 1000));
+            }).catch((error) => {
+                this.setFeedback(error.response.data.message, 'error');
+            });
+        },
+
         /**
          * Duplicates the root's last child to the right of that child
          * @returns {void}
          */
         duplicateById() {
+            let t0 = performance.now();
             if (isNaN(parseInt(this.duplicateId))) {
                 this.duplicateId = "";
                 this.setFeedback("No node ID specified ...", 'error');
@@ -44,9 +130,7 @@ export default {
                     this.allCount = response.data.allCount;
                     this.duplicateByIdTime = response.data.time;
                     this.duplicateId = "";
-
-                    let message = response.data.message + " (id: " + response.data.node.id + ")";
-                    this.setFeedback(message);
+                    this.setData(response, ((performance.now() - t0) / 1000));
                 }).catch((error) => {
                     this.duplicateId = "";
                     this.setFeedback(error.response.data.message, 'error');
@@ -59,6 +143,7 @@ export default {
          * @returns {void}
          */
         deleteById() {
+            let t0 = performance.now();
             if (isNaN(parseInt(this.deleteId))) {
                 this.deleteId = "";
                 this.setFeedback("No node ID specified ...", 'error');
@@ -71,8 +156,7 @@ export default {
                     this.deleteId = "";
                     this.allCount = response.data.allCount;
 
-                    let message = response.data.message + " (id: " + response.data.node.id + ")";
-                    this.setFeedback(message);
+                    this.setData(response, ((performance.now() - t0) / 1000));
                 }).catch((error) => {
                     this.deleteId = "";
                     this.setFeedback(error.response.data.message, 'error');
@@ -155,11 +239,10 @@ export default {
          * @returns {void}
          */
         fetchData() {
+            let t0 = performance.now();
             axios.get('/tree').then((response) => {
                 this.dataFetched = true;
-                this.allCount = response.data.allCount;
-                this.fetchTreeTime = response.data.time;
-                this.setFeedback(response.data.message);
+                this.setData(response, ((performance.now() - t0) / 1000));
             }).catch((error) => {
                 this.setFeedback(error.response.data.message, 'error');
                 console.log(error);

@@ -6,7 +6,8 @@
         <div class="initial-data">
             <h2>Tree Stats</h2>
             <ul>
-                <li>Time to fetch entire tree: <span class="dataEntry">{{ fetchTreeTime }}</span></li>
+                <li>Feedback: <span class="dataEntry" v-bind:class="{ error : feedbackError }">{{ feedback }}</span></li>
+                <li>Timing: <span class="dataEntry">{{ timing.backend }} / {{ timing.frontend }}</span></li>
                 <li>Number of nodes in tree:
                     <span class="dataEntry">{{ allCount }}</span>
                     <span
@@ -22,19 +23,88 @@
                         )
                     </span>
                 </li>
-                <li>Feedback: <span class="dataEntry" v-bind:class="{ error : feedbackError }">{{ feedback }}</span></li>
             </ul>
+        </div>
+
+        <!-- get random node info -->
+        <div class="random-section">
+            <div class="random-node">
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    @click="randomNode"
+                >
+                    Get random node
+                </button>
+            </div>
+            <div class="random-leaf">
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    @click="randomLeaf"
+                >
+                    Get random leaf
+                </button>
+            </div>
+        </div>
+
+        <!-- Append node -->
+        <div class="tree-section append-node">
+            <small>Appends a new, single, and empty node to the node id given</small>
+            <div>
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    @click="appendNode"
+                >
+                    Append node
+                </button>
+                <input
+                    id="append-node-id"
+                    class="form-control"
+                    type="text"
+                    v-model="appendId"
+                />
+            </div>
+        </div>
+
+        <!-- Duplicate node section -->
+        <div class="tree-section copy-node">
+            <small>Copies the first id, incl. subtree, and appends it to the second id</small>
+            <div>
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    @click="copyNode"
+                >
+                    Copy node
+                </button>
+                <input
+                    id="copyId"
+                    class="form-control"
+                    type="text"
+                    v-model="copyNodeId"
+                />
+                <input
+                    id="parentId"
+                    class="form-control"
+                    type="text"
+                    v-model="copyNodeParentId"
+                />
+            </div>
         </div>
 
         <!-- Duplicate node section -->
         <div class="tree-section duplicate-node-by-id">
+            <small>Duplicates the node id, incl. subtree, and adds it as a sibling to that node</small>
+            <small>Does <strong>not</strong> work on the root yet</small>
             <div>
                 <button
                     type="button"
                     class="btn btn-primary btn-sm"
                     @click="duplicateById"
                 >
-                    Duplicate node by id
+                    Duplicate node
                 </button>
                 <input
                     id="duplicate-node-id"
@@ -43,44 +113,18 @@
                     v-model="duplicateId"
                 />
             </div>
-            <div>
-                <p>Time to duplicate node by id: <span class="dataEntry">{{ duplicateByIdTime === null ? "No process ..." : duplicateByIdTime }}</span></p>
-            </div>
-        </div>
-
-        <!-- Add root child section -->
-        <div class="tree-section add-root-child">
-            <button
-                type="button"
-                class="btn btn-primary btn-sm"
-                @click="addRootChild"
-            >
-                Add root child
-            </button>
-            <p>Time to add root child: <span class="dataEntry">{{ addRootChildTime === null ? "No process ..." : addRootChildTime }}</span></p>
-        </div>
-
-        <!-- Add a leaf section -->
-        <div class="tree-section add-child">
-            <button
-                type="button"
-                class="btn btn-primary btn-sm"
-                @click="addLeaf"
-            >
-                Add leaf
-            </button>
-            <p>Time to add leaf: <span class="dataEntry">{{ addLeafTime === null ? "No process ..." : addLeafTime }}</span></p>
         </div>
 
         <!-- Delete a node by id section -->
         <div class="tree-section delete-node-by-id">
+            <small>Deletes the node <strong>incl. subtree</strong></small>
             <div>
                 <button
                     type="button"
                     class="btn btn-primary btn-sm"
                     @click="deleteById"
                 >
-                    Delete node by id
+                    Delete node
                 </button>
                 <input
                     id="delete-node-id"
@@ -89,42 +133,32 @@
                     v-model="deleteId"
                 />
             </div>
-            <div>
-                <p>Time to delete node by id: <span class="dataEntry">{{ deleteByIdTime === null ? "No process ..." : deleteByIdTime }}</span></p>
-            </div>
         </div>
 
-        <!-- Delete a leaf section -->
-        <div class="tree-section delete-child">
-            <button
-                type="button"
-                class="btn btn-primary btn-sm"
-                @click="deleteLeaf"
-            >
-                Delete leaf
-            </button>
-            <p>Time to delete leaf:
-                <span class="dataEntry">{{ deleteLeafTime === null ? "No process ..." : deleteLeafTime }}</span>
-            </p>
-        </div>
-
-        <!-- Delete a node with its children section -->
-        <div class="tree-section delete-child">
-            <button
-                type="button"
-                class="btn btn-primary btn-sm"
-                @click="deleteNodeWithChildren"
-            >
-                Delete root child with subtree
-            </button>
-            <p>Time to delete root child with subtree:
-                <span class="dataEntry">{{ deleteNodeWithChildrenTime === null ? "No process ..." : deleteNodeWithChildrenTime }}</span>
-            </p>
+        <div>
+            <p>Random node info:</p>
+            <ul v-if="randomNodeInfo !== null">
+                <li><span class="dataEntry">id: </span>{{ randomNodeInfo.id }}</li>
+                <li><span class="dataEntry">title: </span>{{ randomNodeInfo.title }}</li>
+                <li><span class="dataEntry">parent_id: </span>{{ randomNodeInfo.parent_id }}</li>
+                <li><span class="dataEntry">position: </span>{{ randomNodeInfo.position }}</li>
+                <li><span class="dataEntry">real_depth: </span>{{ randomNodeInfo.real_depth }}</li>
+                <li><span class="dataEntry">path: </span>{{ randomNodeInfo.path }}</li>
+            </ul>
         </div>
     </div>
 </template>
 
 <style lang="scss">
+    .random-section {
+        display: flex;
+        flex-direction: row;
+
+        div:first-child {
+            margin-right: 10px;
+        }
+    }
+
     .count-difference {
         padding-right: 10px;
     }
@@ -139,8 +173,6 @@
     }
 
     .error {
-        /*background-color: indianred;*/
-        /*color: white;*/
         border-bottom: 3px solid indianred;
     }
 
@@ -150,45 +182,26 @@
 
     .tree-section {
         padding: 10px 0;
-    }
-
-    .delete-node-by-id,
-    .duplicate-node-by-id {
         display: flex;
         flex-direction: column;
-    }
 
-    .delete-node-by-id div,
-    .duplicate-node-by-id div {
-        margin-bottom: 10px;
-    }
+        div {
+            display: flex;
+            flex-direction: row;
 
-    .delete-node-by-id div:first-child,
-    .duplicate-node-by-id div:first-child {
-        display: flex;
-        flex-direction: row;
-    }
+            button {
+                margin-right: 10px;
+            }
 
-    .delete-node-by-id div:first-child button,
-    .duplicate-node-by-id div:first-child button {
-        margin-right: 20px;
-    }
-
-    .add-child,
-    .add-root-child,
-    .delete-child {
-        display: flex;
-        flex-direction: row;
-        border-top: 1px solid lightgrey;
-        border-bottom: 1px solid lightgrey;
-
-        button {
-            margin-right: 20px;
+            input:last-child {
+                margin-left: 10px;
+            }
         }
+    }
 
-        p {
-            margin-top: 10px;
-        }
+    ul {
+        list-style: none;
+        padding: 0;
     }
 </style>
 
