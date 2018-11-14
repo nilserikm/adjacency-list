@@ -3,11 +3,245 @@
 namespace App\Http\Controllers;
 
 use App\node;
+use App\Tree;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
 class WelcomeController extends Controller
 {
+    public $rootId = 1;
+
+    public function copyNode(Request $request)
+    {
+        $start = microtime(true);
+        $success = false;
+        $httpCode = 500;
+        $root = \App\node::find($this->rootId);
+        $node = \App\node::find($request->input('nodeId'));
+        $parent = \App\node::find($request->input('parentId'));
+
+        if (empty($root)) {
+            $message = "Root not found (" . $this->rootId . ")";
+        } else if (empty($node)) {
+            $message = "Node not found (" . $request->input('nodeId') . ")";
+        } else if (empty($parent)) {
+            $message = "Parent not found (" . $request->input('parentId') . ")";
+        } else {
+            $copy = $node->replicate();
+            $node->addSibling($copy);
+            $copy->save();
+
+            if ($node->hasChildren()) {
+                $array = Tree::duplicate($copy, $node->getChildren(), []);
+                foreach($array as $key => $value) {
+                   \App\node::insert($value);
+                }
+            }
+
+            // $parent->addChild($copy);
+            $success = true;
+            $message = "Node copied (" . $node->id . ") new id (" . $copy->id . ") to parent (" . $parent->id . ")";
+            $httpCode = 200;
+
+        }
+
+        return response()->json([
+            'success' => $success,
+            'message' => $message,
+            'allCount' => $this->getCount(),
+            'time' => microtime(true) - $start,
+            'node' => !empty($node) ? $node : null
+        ], $httpCode);
+    }
+
+    public function copyNodeChained(Request $request)
+    {
+        $start = microtime(true);
+        $success = false;
+        $httpCode = 500;
+        $root = \App\node::find($this->rootId);
+        $node = \App\node::find($request->input('nodeId'));
+        $parent = \App\node::find($request->input('parentId'));
+
+        if (empty($root)) {
+            $message = "Root not found (" . $this->rootId . ")";
+        } else if (empty($node)) {
+            $message = "Node not found (" . $request->input('nodeId') . ")";
+        } else if (empty($parent)) {
+            $message = "Parent not found (" . $request->input('parentId') . ")";
+        } else {
+            $copy = $node->replicate();
+            $copy->save();
+
+            if ($node->hasChildren()) {
+                $duplicate = function($base, $children) use (&$duplicate) {
+                    foreach($children as $child) {
+                        $clone = $child->replicate();
+                        // $clone->save();
+                        $base->addChild($clone);
+
+                        if ($child->hasChildren()) {
+                            $duplicate($clone, $child->getChildren());
+                        }
+                    }
+
+                    return $base;
+                };
+
+                $subtree = $duplicate($copy, $node->getChildren());
+                $success = true;
+                $message = "Node copied (" . $node->id . ") new id (" . $copy->id . ") to parent (" . $parent->id . ")";
+                $httpCode = 200;
+            }
+        }
+
+        return response()->json([
+            'success' => $success,
+            'message' => $message,
+            'allCount' => $this->getCount(),
+            'trees' => $this->getTrees(),
+            'time' => microtime(true) - $start,
+            'node' => !empty($node) ? $node : null
+        ], $httpCode);
+    }
+
+    public function appendNode(Request $request)
+    {
+        $start = microtime(true);
+        $success = false;
+        $httpCode = 500;
+        $root = \App\node::find(1);
+        $parent = \App\node::find($request->input('nodeId'));
+
+        if (empty($root)) {
+            $message = "Unable to find root ...";
+        } else if (empty($parent)) {
+            $message = "Parent not found (" . $request->input('nodeId') . ")";
+        } else {
+            $node = new \App\node();
+            $node->title = "New append node ...";
+            $parent->addChild($node);
+
+            $success = true;
+            $httpCode = 200;
+            $message = "Node appended (" . $node->id . ")";
+        }
+
+        return response()->json([
+            'success' => $success,
+            'message' => $message,
+            'allCount' => $this->getCount(),
+            'time' => microtime(true) - $start,
+            'node' => !empty($node) ? $node : null
+        ], $httpCode);
+    }
+
+    public function getRandomLeaf(\App\node $node)
+    {
+        if ($node->hasChildren()) {
+            $child = $node->getChildren()[rand(0, ($node->getChildren()->count() - 1))];
+            return $this->getRandomLeaf($child);
+        }
+
+        return $node;
+    }
+
+    public function randomLeaf(Request $request)
+    {
+        $start = microtime(true);
+        $success = false;
+        $httpCode = 500;
+        $root = \App\node::find(1);
+
+        if (empty($root)) {
+            $message = "Unable to find root ...";
+        } else {
+            $node = $this->getRandomLeaf($root);
+
+            if (is_null($node->parent_id)) {
+                $node->path = $node->title;
+            } else {
+                $node->path = $this->getPath($node);
+            }
+
+            $message = "Random leaf fetched (" . $node->id . ")";
+            $success = true;
+            $httpCode = 200;
+        }
+
+        return response()->json([
+            'success' => $success,
+            'message' => $message,
+            'allCount' => $this->getCount($root),
+            'time' => microtime(true) - $start,
+            'node' => !empty($node) ? $node : null
+        ], $httpCode);
+    }
+
+    public function getRandomNode($node = null)
+    {
+        if (is_null($node)) {
+            $node = \App\node::find(rand(1, \App\node::count()));
+            return $this->getRandomNode($node);
+        }
+
+        return $node;
+    }
+
+    public function getPath($node)
+    {
+        $path = [];
+        array_unshift($path, $node->title);
+
+        if (!is_null($node->parent_id)) {
+            $traverse = function($base, &$array) use (&$traverse) {
+                if (!is_null($base->parent_id)) {
+                    $parent = \App\node::find($base->parent_id);
+                    array_unshift($array, $parent->title);
+                    $traverse($parent, $array);
+                }
+
+                return $array;
+            };
+
+            $path = $traverse($node, $path);
+        }
+
+        return implode(" > ", $path);
+    }
+
+    public function randomNode(Request $request)
+    {
+        $start = microtime(true);
+        $success = false;
+        $httpCode = 500;
+        $root = \App\node::find(1);
+
+        if (empty($root)) {
+            $message = "Unable to find root ...";
+        } else {
+            $node = $this->getRandomNode();
+
+            if (is_null($node->parent_id)) {
+                $node->path = $node->title;
+            } else {
+                $node->path = $this->getPath($node);
+            }
+
+            $message = "Random node fetched (" . $node->id . ")";
+            $success = true;
+            $httpCode = 200;
+        }
+
+        return response()->json([
+            'success' => $success,
+            'message' => $message,
+            'allCount' => $this->getCount($root),
+            'time' => microtime(true) - $start,
+            'node' => !empty($node) ? $node : null
+        ], $httpCode);
+    }
+
     /**
      * Duplicates the corresponding node by id
      * @param Request $request
@@ -30,7 +264,7 @@ class WelcomeController extends Controller
                 $baseClone = $this->duplicateNode($node);
 
                 if (!is_null($baseClone)) {
-                    $message = "Node duplicated ...";
+                    $message = "Node (id: " . $node->id .", depth: " . $node->real_depth . ") copied to new node (id: " . $baseClone->id . ", depth: " . $baseClone->real_depth .") as sibling";
                     $success = true;
                     $httpCode = 200;
                 } else {
@@ -45,9 +279,9 @@ class WelcomeController extends Controller
         return response()->json([
             'success' => $success,
             'message' => $message,
-            'allCount' => $this->getCount($root),
+            'allCount' => $this->getCount(),
+            'trees' => $this->getTrees(),
             'time' => microtime(true) - $start,
-            'treeDesc' => is_null($node) ? null : $node->getDescendantsTree(),
             'node' => !empty($baseClone) ? $baseClone : null
         ], $httpCode);
     }
@@ -329,7 +563,7 @@ class WelcomeController extends Controller
             'success' => $success,
             'message' => $message,
             'root' => $root,
-            'allCount' => $this->getCount($root),
+            'allCount' => $this->getCount(),
             'time' => microtime(true) - $start,
             'node' => !empty($newLeaf) ? $newLeaf : null
         ], $httpCode);
@@ -340,9 +574,21 @@ class WelcomeController extends Controller
      * @param node $root
      * @return int
      */
-    public function getCount(\App\node $root)
+    public function getCount()
     {
-        return $root->countDescendants() + 1;
+        return \App\node::count();
+    }
+
+    public function getTrees()
+    {
+        $trees = [];
+        $roots = \App\node::getRoots();
+        foreach ($roots as $root) {
+            $instance = $root->getTree();
+            array_push($trees, $instance);
+        }
+
+        return $trees;
     }
 
     /**
@@ -350,7 +596,7 @@ class WelcomeController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getTree(Request $request)
+    public function fetchTree(Request $request)
     {
         $start = microtime(true);
         $success = false;
@@ -371,6 +617,7 @@ class WelcomeController extends Controller
             'message' => $message,
             'root' => $root,
             'tree' => $tree,
+            'trees' => $this->getTrees(),
             'allCount' => $this->getCount($root),
             'time' => microtime(true) - $start
         ], $httpCode);
