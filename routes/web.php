@@ -26,3 +26,8 @@ Route::post('/tree/delete-leaf', 'WelcomeController@deleteLeaf');
 Route::post('/tree/delete-by-id', 'WelcomeController@deleteById');
 Route::post('/tree/delete-node-with-children', 'WelcomeController@deleteNodeWithChildren');
 Route::post('/tree/duplicate-by-id', 'WelcomeController@duplicateById');
+
+Route::post('/node/random/node', 'WelcomeController@randomNode');
+Route::post('/node/random/leaf', 'WelcomeController@randomLeaf');
+Route::post('/node/append', 'WelcomeController@appendNode');
+Route::post('/node/copy', 'WelcomeController@copyNode');
