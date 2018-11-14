@@ -13,6 +13,8 @@ export default {
             appendId: null,
             copyNodeId: null,
             copyNodeParentId: null,
+            copyNodeChainedId: null,
+            copyNodeChainedParentId: null,
             countDifference: null,
             deleteLeafTime: null,
             deleteByIdTime: null,
@@ -55,6 +57,31 @@ export default {
                 }).catch((error) => {
                     this.copyNodeId = null;
                     this.copyNodeParentId = null;
+                    this.setFeedback(error.response.data.message, 'error');
+                });
+            }
+        },
+
+        copyNodeChained() {
+            if (isNaN(parseInt(this.copyNodeChainedId)) || isNaN(parseInt(this.copyNodeChainedParentId))) {
+                this.copyNodeChainedId = null;
+                this.copyNodeChainedParentId = null;
+                this.setFeedback("No node ID specified ...", 'error');
+            } else {
+                let t0 = performance.now();
+                let url = "/node/copy-chained";
+                let data = {
+                    'nodeId': this.copyNodeChainedId,
+                    'parentId': this.copyNodeChainedParentId
+                };
+
+                axios.post(url, data).then((response) => {
+                    this.copyNodeChainedId = null;
+                    this.copyNodeChainedParentId = null;
+                    this.setData(response, (((performance.now() - t0) / 1000)));
+                }).catch((error) => {
+                    this.copyNodeChainedId = null;
+                    this.copyNodeChainedParentId = null;
                     this.setFeedback(error.response.data.message, 'error');
                 });
             }
