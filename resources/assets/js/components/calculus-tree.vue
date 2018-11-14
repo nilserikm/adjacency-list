@@ -94,6 +94,30 @@
             </div>
         </div>
 
+        <div class="tree-section copy-node-chained">
+            <small>Copies the first id, incl. subtree, and appends it to the second id</small>
+            <small>"Chained-inserts"</small>
+            <div>
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    @click="copyNodeChained"
+                >
+                    Copy node chained
+                </button>
+                <input
+                    class="form-control"
+                    type="text"
+                    v-model="copyNodeChainedId"
+                />
+                <input
+                    class="form-control"
+                    type="text"
+                    v-model="copyNodeChainedParentId"
+                />
+            </div>
+        </div>
+
         <!-- Duplicate node section -->
         <div class="tree-section duplicate-node-by-id">
             <small>Duplicates the node id, incl. subtree, and adds it as a sibling to that node</small>
