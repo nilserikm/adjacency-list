@@ -19,7 +19,7 @@ Route::get('/node-calculation', function() {
     return view('node-calculation');
 });
 
-Route::get('/tree', 'WelcomeController@getTree');
+Route::get('/tree', 'WelcomeController@fetchTree');
 Route::post('/tree/add-root-child', 'WelcomeController@addRootChild');
 Route::post('/tree/add-leaf', 'WelcomeController@addLeaf');
 Route::post('/tree/delete-leaf', 'WelcomeController@deleteLeaf');
