@@ -109,21 +109,6 @@ class NodeController extends Controller
     }
 
     /**
-     * Returns a random node from the table
-     * @param null $node
-     * @return null
-     */
-    public function getRandomNode($node = null)
-    {
-        if (is_null($node)) {
-            $node = node::find(rand(1, node::count()));
-            return $this->getRandomNode($node);
-        }
-
-        return $node;
-    }
-
-    /**
      * Returns the node's path in the tree
      * @param $node
      * @return array|mixed|string
@@ -175,7 +160,7 @@ class NodeController extends Controller
         if (empty($root)) {
             $message = "Root not found (" . $this->rootId . ")";
         } else {
-            $node = $this->getRandomNode();
+            $node = Node::getRandom($this->companyId);
             $node->path = $this->getPath($node);
 
             $message = "Random node fetched (" . $node->id . ")";

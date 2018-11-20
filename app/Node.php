@@ -19,6 +19,17 @@ class node extends Entity implements nodeInterface
     protected $closure = 'App\nodeClosure';
 
     /**
+     * Returns a random node from a randomly chosen tree
+     * @param int $companyId
+     * @return node $random
+     */
+    public static function getRandom(int $companyId)
+    {
+        $count = self::getCount($companyId);
+        return node::where('company_id', $companyId)->get()[rand(0, ($count - 1))];
+    }
+
+    /**
      * Returns the count of the nodes in the trees in the array. If the array is
      * empty then all of the company's trees will be fetched and the the count
      * will be done
