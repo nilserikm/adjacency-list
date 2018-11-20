@@ -109,41 +109,6 @@ class NodeController extends Controller
     }
 
     /**
-     * Returns the node's path in the tree
-     * @param $node
-     * @return array|mixed|string
-     */
-    public function getPath($node)
-    {
-        if (empty($node->parent_id)) {
-            $path = $node->title;
-        } else {
-            $path = [];
-            array_unshift($path, $node->title);
-
-            if (!is_null($node->parent_id)) {
-                $traverse = function($base, &$array) use (&$traverse) {
-                    if (!is_null($base->parent_id)) {
-                        $parent = node::where('id', $base->parent_id)
-                            ->where('company_id', $this->companyId)
-                            ->first();
-                        array_unshift($array, $parent->title);
-                        $traverse($parent, $array);
-                    }
-
-                    return $array;
-                };
-
-                $path = $traverse($node, $path);
-            }
-
-            $path = implode(" > ", $path);
-        }
-
-        return $path;
-    }
-
-    /**
      * Returns a random node from the tree
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -161,7 +126,7 @@ class NodeController extends Controller
             $message = "Root not found (" . $this->rootId . ")";
         } else {
             $node = Node::getRandom($this->companyId);
-            $node->path = $this->getPath($node);
+            $node->path = Node::getPath($node, $this->companyId);
 
             $message = "Random node fetched (" . $node->id . ")";
             $success = true;

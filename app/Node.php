@@ -40,4 +40,39 @@ class node extends Entity implements nodeInterface
     {
         return node::where('company_id', $companyId)->count();
     }
+
+    /**
+     * Returns the node's path in the tree
+     * @param node $node
+     * @return array|mixed|string
+     */
+    public static function getPath(node $node, int $companyId)
+    {
+        if (empty($node->parent_id)) {
+            $path = $node->title;
+        } else {
+            $path = [];
+            array_unshift($path, $node->title);
+
+            if (!is_null($node->parent_id)) {
+                $traverse = function($base, &$array, &$companyId) use (&$traverse) {
+                    if (!is_null($base->parent_id)) {
+                        $parent = node::where('id', $base->parent_id)
+                            ->where('company_id', $companyId)
+                            ->first();
+                        array_unshift($array, $parent->title);
+                        $traverse($parent, $array, $companyId);
+                    }
+
+                    return $array;
+                };
+
+                $path = $traverse($node, $path, $companyId);
+            }
+
+            $path = implode(" > ", $path);
+        }
+
+        return $path;
+    }
 }
