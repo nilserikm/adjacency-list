@@ -12,49 +12,6 @@ class WelcomeController extends Controller
     public $rootId = 1;
     public $companyId = 1;
 
-    public function copyNode(Request $request)
-    {
-        $start = microtime(true);
-        $success = false;
-        $httpCode = 500;
-        $root = \App\node::find($this->rootId);
-        $node = \App\node::find($request->input('nodeId'));
-        $parent = \App\node::find($request->input('parentId'));
-
-        if (empty($root)) {
-            $message = "Root not found (" . $this->rootId . ")";
-        } else if (empty($node)) {
-            $message = "Node not found (" . $request->input('nodeId') . ")";
-        } else if (empty($parent)) {
-            $message = "Parent not found (" . $request->input('parentId') . ")";
-        } else {
-            $copy = $node->replicate();
-            $node->addSibling($copy);
-            $copy->save();
-
-            if ($node->hasChildren()) {
-                $array = Tree::duplicate($copy, $node->getChildren(), []);
-                foreach($array as $key => $value) {
-                   \App\node::insert($value);
-                }
-            }
-
-            // $parent->addChild($copy);
-            $success = true;
-            $message = "Node copied (" . $node->id . ") new id (" . $copy->id . ") to parent (" . $parent->id . ")";
-            $httpCode = 200;
-
-        }
-
-        return response()->json([
-            'success' => $success,
-            'message' => $message,
-            'allCount' => $this->getCount(),
-            'time' => microtime(true) - $start,
-            'node' => !empty($node) ? $node : null
-        ], $httpCode);
-    }
-
     public function copyNodeChained(Request $request)
     {
         $start = microtime(true);
