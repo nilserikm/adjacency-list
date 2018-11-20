@@ -130,19 +130,26 @@
         <div class="outer-tree-container col-lg-6">
             <h1>Tree Structure</h1>
             <div
-                v-if="dataFetched"
-                class="tree-container"
-                v-for="(tree, index) in trees"
-                :key="'tree' + index"
+                v-if="rootsFetched"
+                v-for="root in roots"
+                :key="root.id"
             >
-                <node
-                    :nodes="tree[index].children"
-                    :title="tree[index].title"
-                    :estimate="tree[index].estimate"
-                    :show="false"
-                >
-                </node>
+                {{ root.title }}
             </div>
+            <!--<div-->
+                <!--v-if="dataFetched"-->
+                <!--class="tree-container"-->
+                <!--v-for="(tree, index) in trees"-->
+                <!--:key="'tree' + index"-->
+            <!--&gt;-->
+                <!--<node-->
+                    <!--:nodes="tree[index].children"-->
+                    <!--:title="tree[index].title"-->
+                    <!--:estimate="tree[index].estimate"-->
+                    <!--:show="false"-->
+                <!--&gt;-->
+                <!--</node>-->
+            <!--</div>-->
         </div>
     </div>
 </template>

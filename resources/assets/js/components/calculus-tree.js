@@ -4,7 +4,8 @@ export default {
     data() {
         return {
             // modality variables
-            dataFetched: false,
+            rootsFetched: false,
+            treesFetched: false,
 
             // data variables
             allCount: null,
@@ -20,6 +21,7 @@ export default {
             loading: false,
             randomNodeInfo: null,
             root: null,
+            roots: [],
             seconds: 0,
             timing: {
                 backend: null,
@@ -36,7 +38,8 @@ export default {
         this.loading = true;
         this.seconds = performance.now();
         this.startInterval();
-        this.fetch();
+        this.fetchRoots();
+        this.fetchDescendants();
     },
 
     methods: {
@@ -187,14 +190,32 @@ export default {
          * Fetch the basic tree-data from the backend
          * @returns {void}
          */
-        fetch() {
+        fetchDescendants() {
             this.startInterval();
             this.timing.initStart = performance.now();
-            axios.get('/tree').then((response) => {
-                this.trees = response.data.trees;
-                this.tree = this.trees[0];
+            axios.get('/tree/descendants').then((response) => {
                 this.loading = false;
-                this.dataFetched = true;
+                this.rootsFetched = true;
+                this.trees = response.data.trees;
+                this.setData(response, ((performance.now() - this.timing.initStart) / 1000));
+                clearInterval(this.interval);
+            }).catch((error) => {
+                this.setFeedback(error.response.data.message, 'error');
+                clearInterval(this.interval);
+            });
+        },
+
+        /**
+         * Fetch the roots from the backend
+         * @returns {void}
+         */
+        fetchRoots() {
+            this.startInterval();
+            this.timing.initStart = performance.now();
+            axios.get('/tree/roots').then((response) => {
+                this.loading = false;
+                this.rootsFetched = true;
+                this.roots = response.data.roots;
                 this.setData(response, ((performance.now() - this.timing.initStart) / 1000));
                 clearInterval(this.interval);
             }).catch((error) => {
@@ -227,7 +248,7 @@ export default {
          * @returns {boolean}
          */
         modalityMode() {
-            return !this.dataFetched || this.loading;
+            return !this.rootsFetched || this.loading;
         },
 
         /**

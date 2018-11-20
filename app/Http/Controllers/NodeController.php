@@ -224,17 +224,53 @@ class NodeController extends Controller
     }
 
     /**
-     * Returns all of the company's trees as trees
+     * Returns all of the company's roots
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function fetch(Request $request)
+    public function fetchRoots(Request $request)
     {
         $start = microtime(true);
         $success = false;
 
         try {
-            $trees = Tree::getTrees($this->companyId);
+            $roots = node::where('company_id', $this->companyId)
+                ->where('parent_id', null)
+                ->get();
+            $message = "Roots fetched";
+            $success = true;
+            $httpCode = 200;
+        } catch(\Exception $exception) {
+            $message = $exception->getMessage();
+            $httpCode = $exception->getCode();
+        }
+
+        $time = microtime(true) - $start;
+
+        return response()->json([
+            'success' => $success,
+            'message' => $message,
+            'roots' => !empty($roots) ? $roots : null,
+            'allCount' => Node::getCount($this->companyId),
+            'time' => $time
+        ], $httpCode);
+    }
+
+    /**
+     * Returns all of the company's roots' descendants
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function fetchDescendants(Request $request)
+    {
+        $start = microtime(true);
+        $success = false;
+
+        try {
+            $roots = node::where('company_id', $this->companyId)
+                ->where('parent_id', null)
+                ->get();
+            $trees = Tree::getTrees($roots);
             $message = "Trees fetched";
             $success = true;
             $httpCode = 200;
