@@ -41,29 +41,12 @@ export default {
     },
 
     methods: {
-        copyNode() {
-            if (isNaN(parseInt(this.copyNodeId)) || isNaN(parseInt(this.copyNodeParentId))) {
-                this.copyNodeId = null;
-                this.copyNodeParentId = null;
-                this.setFeedback("No node ID specified ...", 'error');
-            } else {
-                let t0 = performance.now();
-                let url = "/node/copy";
-                let data = {
-                    'nodeId': this.copyNodeId,
-                    'parentId': this.copyNodeParentId
-                };
+        startInterval() {
+            this.interval = setInterval(this.setSeconds, 10)
+        },
 
-                axios.post(url, data).then((response) => {
-                    this.copyNodeId = null;
-                    this.copyNodeParentId = null;
-                    this.setData(response, (((performance.now() - t0) / 1000)));
-                }).catch((error) => {
-                    this.copyNodeId = null;
-                    this.copyNodeParentId = null;
-                    this.setFeedback(error.response.data.message, 'error');
-                });
-            }
+        setSeconds() {
+            this.seconds = ((performance.now() - this.timing.initStart)/1000).toFixed(1);
         },
 
         copyNodeChained() {
