@@ -268,41 +268,4 @@ class NodeController extends Controller
             'time' => $time
         ], $httpCode);
     }
-
-    /**
-     * Returns the node tree
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function fetchTree(Request $request)
-    {
-        $start = microtime(true);
-        $success = false;
-        $httpCode = 500;
-
-        $root = node::where('id', $this->rootId)
-            ->where('company_id', $this->companyId)
-            ->first();
-
-        if (empty($root)) {
-            $message = "root does not exist";
-        } else {
-            $tree = $root->getDescendantsTree();
-            $success = true;
-            $message = "Tree data fetched ...";
-            $httpCode = 200;
-        }
-
-        $time = microtime(true) - $start;
-
-        return response()->json([
-            'success' => $success,
-            'message' => $message,
-            'root' => !empty($root) ? $root : null,
-            'tree' => !empty($tree) ? $tree : null,
-            'treeCount' => ($root->countDescendants() + 1),
-            'allCount' => Node::getCount($this->companyId),
-            'time' => $time
-        ], $httpCode);
-    }
 }
