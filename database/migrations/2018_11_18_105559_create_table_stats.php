@@ -15,11 +15,11 @@ class CreateTableStats extends Migration
     {
         Schema::create('stats', function(Blueprint $table) {
             $table->increments('id');
-            $table->float('clone_time');
-            $table->unsignedInteger('cloned_num');
-            $table->unsignedInteger('tree_num');
-            $table->unsignedInteger('table_num');
-            $table->float('read_time');
+            $table->float('clone_time')->nullable();
+            $table->unsignedInteger('cloned_num')->nullable();
+            $table->unsignedInteger('tree_num')->nullable();
+            $table->unsignedInteger('table_num')->nullable();
+            $table->float('read_time')->nullable();
             $table->timestamps();
         });
     }
