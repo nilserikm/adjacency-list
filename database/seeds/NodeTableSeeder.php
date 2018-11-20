@@ -15,16 +15,11 @@ class NodeTableSeeder extends Seeder
     {
         $start = microtime(true);
 
-        // seed time ~20s
-        // node count ~3.5k
-        // number of buildings matches number of entries in buildingNames
-        $buildingNames = ["H6-H10", "R-11", "R-3"];
+        // $buildingNames = ["H6-H10", "R-11", "R-3"];
+        $buildingNames = ["H6-H10"];
         $numPhases = 7;
-        $numApartments = 2;
-        $numActivities = 2;
-//        $numPhases = 7;
-//        $numApartments = 20;
-//        $numActivities = 25;
+        $numApartments = 20;
+        $numActivities = 25;
         $numUnnamedFirst = 0;
         $numUnnamedSecond = 0;
 
