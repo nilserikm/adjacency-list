@@ -7,42 +7,55 @@ export default {
             dataFetched: false,
 
             // data variables
-            addLeafTime: null,
-            addRootChildTime: null,
             allCount: null,
             appendId: null,
             copyNodeId: null,
             copyNodeParentId: null,
             countDifference: null,
-            deleteLeafTime: null,
-            deleteByIdTime: null,
             deleteId: null,
-            deleteNodeWithChildrenTime: null,
-            duplicateByIdTime: null,
             duplicateId: null,
             feedback: "",
             feedbackError: false,
+            interval: null,
             loading: false,
             randomNodeInfo: null,
+            root: null,
+            seconds: 0,
             timing: {
                 backend: null,
-                frontend: null
+                frontend: null,
+                initStart: 0
             },
-            trees: [],
             tree: null,
-            root: null
+            treeCount: null,
+            trees: [],
         }
     },
 
     created() {
+        this.loading = true;
+        this.seconds = performance.now();
+        this.startInterval();
         this.fetchData();
     },
 
     methods: {
+        /**
+         * Starts an interval which sets the component's seconds attribute every
+         * 10ms, which is used in conjunction with the loader/overlay to display
+         * the elapsed time while in loading
+         * @returns {void}
+         */
         startInterval() {
             this.interval = setInterval(this.setSeconds, 10)
         },
 
+        /**
+         * Sets the component's seconds attribute to a 2 digit float, which is
+         * used in conjunction with the loader/overlay to display the elapsed
+         * time while in loading
+         * @returns {void}
+         */
         setSeconds() {
             this.seconds = ((performance.now() - this.timing.initStart)/1000).toFixed(1);
         },
@@ -57,7 +70,7 @@ export default {
                 this.copyNodeParentId = null;
                 this.setFeedback("No node ID specified ...", 'error');
             } else {
-                this.loading.intermittent = true;
+                this.loading = true;
                 this.timing.initStart = performance.now();
                 let data = {
                     'nodeId': this.copyNodeId,
@@ -71,63 +84,74 @@ export default {
                 }).finally(() => {
                     clearInterval(this.interval);
                     clearInterval(this.interval);
-                    this.loading.intermittent = false;
+                    this.loading = false;
                     this.copyNodeId = null;
                     this.copyNodeParentId = null;
                 });
             }
         },
 
+        /**
+         * Appends a new, empty node to the given node id
+         * @returns {void}
+         */
         appendNode() {
             if (isNaN(parseInt(this.appendId))) {
                 this.appendId = null;
                 this.setFeedback("No node ID specified ...", 'error');
             } else {
-                let t0 = performance.now();
-                let url = "/node/append";
+                this.startInterval();
+                this.loading = true;
+                this.timing.initStart = performance.now();
                 let data = { 'nodeId': this.appendId };
 
-                axios.post(url, data).then((response) => {
-                    this.appendId = null;
-                    this.setData(response, (((performance.now() - t0) / 1000)));
+                axios.post('/node/append', data).then((response) => {
+                    this.trees = response.data.trees;
+                    this.setData(response, (((performance.now() - this.timing.initStart) / 1000)));
                 }).catch((error) => {
-                    this.appendId = null;
                     this.setFeedback(error.response.data.message, 'error');
+                }).finally(() => {
+                    this.loading = false;
+                    this.appendId = null;
+                    clearInterval(this.interval);
                 });
             }
         },
 
+        /**
+         * Sets the display variables used in frontend as process feedback to
+         * the user
+         * @param response
+         * @param frontendTime
+         * @returns {void}
+         */
         setData(response, frontendTime) {
             this.countDifference = response.data.allCount - this.allCount;
+            this.treeCount = response.data.treeCount;
             this.allCount = response.data.allCount;
-            this.timing.backend = response.data.time;
-            this.timing.frontend = frontendTime;
+            this.timing.backend = response.data.time.toFixed(2);
+            this.timing.frontend = frontendTime.toFixed(2);
             this.setFeedback(response.data.message);
         },
 
+        /**
+         * Fetches a random node and displays a relevant set of its data
+         * @returns {void}
+         */
         randomNode() {
-            let t0 = performance.now();
-            let url = "/node/random/node";
-            let data = {};
+            this.startInterval();
+            this.loading = true;
+            this.timing.initStart = performance.now();
 
-            axios.post(url, data).then((response) => {
+            axios.post("/node/random/node", {}).then((response) => {
                 this.randomNodeInfo = response.data.node;
                 this.setData(response, (((performance.now() - t0) / 1000)));
             }).catch((error) => {
                 this.setFeedback(error.response.data.message, 'error');
-            });
-        },
-
-        randomLeaf() {
-            let t0 = performance.now();
-            let url = "/node/random/leaf";
-            let data = {};
-
-            axios.post(url, data).then((response) => {
-                this.randomNodeInfo = response.data.node;
-                this.setData(response, ((performance.now() - t0) / 1000));
-            }).catch((error) => {
-                this.setFeedback(error.response.data.message, 'error');
+            }).finally(() => {
+                this.randomNodeInfo = null;
+                this.loading = false;
+                clearInterval(this.interval);
             });
         },
 
@@ -158,91 +182,27 @@ export default {
          * @returns {void}
          */
         deleteById() {
-            let t0 = performance.now();
             if (isNaN(parseInt(this.deleteId))) {
                 this.deleteId = "";
                 this.setFeedback("No node ID specified ...", 'error');
             } else {
+                this.loading = true;
+                this.timing.initStart = performance.now();
                 let data = { 'deleteId': this.deleteId };
 
                 axios.post('/tree/delete-by-id', data).then((response) => {
+                    this.trees = response.data.trees;
                     this.deleteId = "";
-                    this.setData(response, ((performance.now() - t0) / 1000));
+                    this.setData(response, ((performance.now() - this.timing.initStart) / 1000));
+                    this.loading = false;
+                    clearInterval(this.interval);
                 }).catch((error) => {
                     this.deleteId = "";
                     this.setFeedback(error.response.data.message, 'error');
+                    this.loading = false;
+                    clearInterval(this.interval);
                 });
             }
-        },
-
-        /**
-         * Adds another child to the root node
-         * @returns {void}
-         */
-        addRootChild() {
-            axios.post('/tree/add-root-child').then((response) => {
-                console.log(response);
-                this.allCount = response.data.allCount;
-                this.addRootChildTime = response.data.time;
-
-                let message = response.data.message + " (id: " + response.data.node.id + ")";
-                this.setFeedback(message);
-            }).catch((error) => {
-                this.setFeedback(error.response.data.message, 'error');
-                console.log(error);
-            });
-        },
-
-        /**
-         * Deletes a node along with its children
-         * @returns {void}
-         */
-        deleteNodeWithChildren() {
-            axios.post('/tree/delete-node-with-children').then((response) => {
-                this.allCount = response.data.allCount;
-                this.deleteNodeWithChildrenTime = response.data.time;
-
-                let message = response.data.message + " (id: " + response.data.node.id + ")";
-                this.setFeedback(message);
-            }).catch((error) => {
-                this.setFeedback(error.response.data.message, 'error');
-                console.log(error);
-            });
-        },
-
-        /**
-         * Delete the first found left-hand leaf in the tree
-         * @returns {void}
-         */
-        deleteLeaf() {
-            axios.post('/tree/delete-leaf').then((response) => {
-                this.allCount = response.data.allCount;
-                this.deleteLeafTime = response.data.time;
-
-                let message = response.data.message + " (id: " + response.data.node.id + ")";
-                this.setFeedback(message);
-            }).catch((error) => {
-                this.setFeedback(error.response.data.message, 'error');
-                console.log(error);
-            });
-        },
-
-        /**
-         * Adds a new leaf under the first-found already existing leaf on the
-         * left-hand side of the tree
-         * @returns {void}
-         */
-        addLeaf() {
-            axios.post('/tree/add-leaf').then((response) => {
-                this.allCount = response.data.allCount;
-                this.addLeafTime = response.data.time;
-
-                let message = response.data.message + " (id: " + response.data.node.id + ")";
-                this.setFeedback(message);
-            }).catch((error) => {
-                this.setFeedback(error.response.data.message, 'error');
-                console.log(error);
-            });
         },
 
         /**
@@ -250,16 +210,21 @@ export default {
          * @returns {void}
          */
         fetchData() {
-            let t0 = performance.now();
+            this.startInterval();
+            this.timing.initStart = performance.now();
             axios.get('/tree').then((response) => {
-                this.trees = response.data.trees;
+                this.treeCount = response.data.treeCount;
                 this.tree = response.data.tree;
+                this.trees = response.data.trees;
                 this.root = this.tree[0];
+                this.loading = false;
                 this.dataFetched = true;
-                this.setData(response, ((performance.now() - t0) / 1000));
+                this.setData(response, ((performance.now() - this.timing.initStart) / 1000));
+                clearInterval(this.interval);
             }).catch((error) => {
                 this.setFeedback(error.response.data.message, 'error');
                 console.log(error);
+                clearInterval(this.interval);
             });
         },
 
@@ -281,6 +246,11 @@ export default {
     },
 
     computed: {
+        /**
+         * Returns true if the application is currently "loading", false
+         * otherwise
+         * @returns {boolean}
+         */
         modalityMode() {
             return !this.dataFetched || this.loading;
         },
@@ -295,7 +265,7 @@ export default {
                 if (Math.sign(this.countDifference) === 1) {
                     return true;
                 }
-            }
+           }
 
             return false;
         }

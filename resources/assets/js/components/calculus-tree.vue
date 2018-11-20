@@ -1,15 +1,16 @@
 <template>
     <div class="outer-container ">
         <div class="data-container col-lg-6">
-            <h1>Adjacency List Operations</h1>
-
             <!-- General statistics about the tree -->
             <div class="initial-data">
                 <h2>Tree Stats</h2>
                 <ul>
                     <li>Feedback: <span class="dataEntry" v-bind:class="{ error : feedbackError }">{{ feedback }}</span></li>
-                    <li>Timing: <span class="dataEntry">{{ timing.backend }} / {{ timing.frontend }}</span></li>
+                    <li>Timing: <span class="dataEntry">{{ timing.backend }} s / {{ timing.frontend }} s</span></li>
                     <li>Number of nodes in tree:
+                        <span class="dataEntry">{{ treeCount }}</span>
+                    </li>
+                    <li>Number of nodes in table:
                         <span class="dataEntry">{{ allCount }}</span>
                         <span
                             v-if="countDifference !== null"
@@ -27,150 +28,104 @@
                 </ul>
             </div>
 
-            <!-- get random node info -->
-            <div class="random-section">
-                <div class="random-node">
-                    <button
-                        type="button"
-                        class="btn btn-primary btn-sm"
-                        @click="randomNode"
-                    >
-                        Get random node
-                    </button>
-                </div>
-                <div class="random-leaf">
-                    <button
-                        type="button"
-                        class="btn btn-primary btn-sm"
-                        @click="randomLeaf"
-                    >
-                        Get random leaf
-                    </button>
-                </div>
-            </div>
-
-            <!-- Append node -->
-            <div class="tree-section append-node">
-                <small>Appends a new, single, and empty node to the node id given</small>
+            <div v-if="modalityMode" id="overlay">
                 <div>
-                    <button
-                        type="button"
-                        class="btn btn-primary btn-sm"
-                        @click="appendNode"
-                    >
-                        Append node
-                    </button>
-                    <input
-                        id="append-node-id"
-                        class="form-control"
-                        type="text"
-                        v-model="appendId"
-                    />
+                    <vue-simple-spinner size="large"></vue-simple-spinner>
+                    <h4 class="load-inter-message">Loading data ... <span class="seconds">{{ seconds }}</span> s</h4>
                 </div>
             </div>
 
-            <!-- Duplicate node section -->
-            <div class="tree-section copy-node">
-                <small>Copies the first id, incl. subtree, and appends it to the second id</small>
+            <div v-else>
+                <!-- get random node info -->
+                <div class="random-section">
+                    <div class="random-node">
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm"
+                            @click="randomNode"
+                        >
+                            Get random node
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Append node -->
+                <div class="tree-section append-node">
+                    <small>Appends a new, single, and empty node to the node id given</small>
+                    <div>
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm"
+                            @click="appendNode"
+                        >
+                            Append node
+                        </button>
+                        <input
+                            id="append-node-id"
+                            class="form-control"
+                            type="text"
+                            v-model="appendId"
+                        />
+                    </div>
+                </div>
+
+                <div class="tree-section copy-node-chained">
+                    <small>Copies the first id, incl. subtree, and appends it to the second id</small>
+                    <small>"Chained-inserts"</small>
+                    <div>
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm"
+                            @click="copyNode"
+                        >
+                            Copy node chained
+                        </button>
+                        <input
+                            class="form-control"
+                            type="text"
+                            v-model="copyNodeId"
+                        />
+                        <input
+                            class="form-control"
+                            type="text"
+                            v-model="copyNodeParentId"
+                        />
+                    </div>
+                </div>
+
+                <!-- Delete a node by id section -->
+                <div class="tree-section delete-node-by-id">
+                    <small>Deletes the node <strong>incl. subtree</strong></small>
+                    <div>
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm"
+                            @click="deleteById"
+                        >
+                            Delete node
+                        </button>
+                        <input
+                            id="delete-node-id"
+                            class="form-control"
+                            type="text"
+                            v-model="deleteId"
+                        />
+                    </div>
+                </div>
+
                 <div>
-                    <button
-                        type="button"
-                        class="btn btn-primary btn-sm"
-                        @click="copyNode"
-                    >
-                        Copy node
-                    </button>
-                    <input
-                        id="copyId"
-                        class="form-control"
-                        type="text"
-                        v-model="copyNodeId"
-                    />
-                    <input
-                        id="parentId"
-                        class="form-control"
-                        type="text"
-                        v-model="copyNodeParentId"
-                    />
+                    <p>Random node info:</p>
+                    <ul v-if="randomNodeInfo !== null">
+                        <li><span class="dataEntry">id: </span>{{ randomNodeInfo.id }}</li>
+                        <li><span class="dataEntry">title: </span>{{ randomNodeInfo.title }}</li>
+                        <li><span class="dataEntry">parent_id: </span>{{ randomNodeInfo.parent_id }}</li>
+                        <li><span class="dataEntry">position: </span>{{ randomNodeInfo.position }}</li>
+                        <li><span class="dataEntry">real_depth: </span>{{ randomNodeInfo.real_depth }}</li>
+                        <li><span class="dataEntry">path: </span><span class="node-path">{{ randomNodeInfo.path }}</span></li>
+                    </ul>
                 </div>
             </div>
 
-            <div class="tree-section copy-node-chained">
-                <small>Copies the first id, incl. subtree, and appends it to the second id</small>
-                <small>"Chained-inserts"</small>
-                <div>
-                    <button
-                        type="button"
-                        class="btn btn-primary btn-sm"
-                        @click="copyNodeChained"
-                    >
-                        Copy node chained
-                    </button>
-                    <input
-                        class="form-control"
-                        type="text"
-                        v-model="copyNodeChainedId"
-                    />
-                    <input
-                        class="form-control"
-                        type="text"
-                        v-model="copyNodeChainedParentId"
-                    />
-                </div>
-            </div>
-
-            <!-- Duplicate node section -->
-            <div class="tree-section duplicate-node-by-id">
-                <small>Duplicates the node id, incl. subtree, and adds it as a sibling to that node</small>
-                <small>Does <strong>not</strong> work on the root yet</small>
-                <div>
-                    <button
-                        type="button"
-                        class="btn btn-primary btn-sm"
-                        @click="duplicateById"
-                    >
-                        Duplicate node
-                    </button>
-                    <input
-                        id="duplicate-node-id"
-                        class="form-control"
-                        type="text"
-                        v-model="duplicateId"
-                    />
-                </div>
-            </div>
-
-            <!-- Delete a node by id section -->
-            <div class="tree-section delete-node-by-id">
-                <small>Deletes the node <strong>incl. subtree</strong></small>
-                <div>
-                    <button
-                        type="button"
-                        class="btn btn-primary btn-sm"
-                        @click="deleteById"
-                    >
-                        Delete node
-                    </button>
-                    <input
-                        id="delete-node-id"
-                        class="form-control"
-                        type="text"
-                        v-model="deleteId"
-                    />
-                </div>
-            </div>
-
-            <div>
-                <p>Random node info:</p>
-                <ul v-if="randomNodeInfo !== null">
-                    <li><span class="dataEntry">id: </span>{{ randomNodeInfo.id }}</li>
-                    <li><span class="dataEntry">title: </span>{{ randomNodeInfo.title }}</li>
-                    <li><span class="dataEntry">parent_id: </span>{{ randomNodeInfo.parent_id }}</li>
-                    <li><span class="dataEntry">position: </span>{{ randomNodeInfo.position }}</li>
-                    <li><span class="dataEntry">real_depth: </span>{{ randomNodeInfo.real_depth }}</li>
-                    <li><span class="dataEntry">path: </span>{{ randomNodeInfo.path }}</li>
-                </ul>
-            </div>
         </div>
         <div class="outer-tree-container col-lg-6">
             <h1>Tree Structure</h1>
@@ -193,6 +148,38 @@
 </template>
 
 <style lang="scss">
+    .node-path {
+        font-size: 18px;
+        border-bottom: 3px solid indianred;
+    }
+
+    #overlay {
+        position: fixed; /* Sit on top of the page content */
+        display: block; /* Hidden by default */
+        width: 100%; /* Full width (cover the whole page) */
+        height: 100%; /* Full height (cover the whole page) */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+        z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+        cursor: pointer; /* Add a pointer on hover */
+
+        h4 {
+            text-align: center;
+            color: white;
+        }
+
+        div {
+            margin-top: 400px;
+        }
+    }
+
+    .load-message {
+        text-align: center;
+    }
+    
     .outer-tree-container {
         display: flex;
         flex-direction: column;
