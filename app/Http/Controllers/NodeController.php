@@ -139,7 +139,9 @@ class NodeController extends Controller
             if (!is_null($node->parent_id)) {
                 $traverse = function($base, &$array) use (&$traverse) {
                     if (!is_null($base->parent_id)) {
-                        $parent = node::find($base->parent_id);
+                        $parent = node::where('id', $base->parent_id)
+                            ->where('company_id', $this->companyId)
+                            ->first();
                         array_unshift($array, $parent->title);
                         $traverse($parent, $array);
                     }
