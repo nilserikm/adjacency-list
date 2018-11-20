@@ -13,8 +13,6 @@ export default {
             appendId: null,
             copyNodeId: null,
             copyNodeParentId: null,
-            copyNodeChainedId: null,
-            copyNodeChainedParentId: null,
             countDifference: null,
             deleteLeafTime: null,
             deleteByIdTime: null,
@@ -49,28 +47,33 @@ export default {
             this.seconds = ((performance.now() - this.timing.initStart)/1000).toFixed(1);
         },
 
-        copyNodeChained() {
-            if (isNaN(parseInt(this.copyNodeChainedId)) || isNaN(parseInt(this.copyNodeChainedParentId))) {
-                this.copyNodeChainedId = null;
-                this.copyNodeChainedParentId = null;
+        /**
+         * Copies a node with subtree and appends it to the given parent
+         * @returns {void}
+         */
+        copyNode() {
+            if (isNaN(parseInt(this.copyNodeId)) || isNaN(parseInt(this.copyNodeParentId))) {
+                this.copyNodeId = null;
+                this.copyNodeParentId = null;
                 this.setFeedback("No node ID specified ...", 'error');
             } else {
-                let t0 = performance.now();
-                let url = "/node/copy-chained";
+                this.loading.intermittent = true;
+                this.timing.initStart = performance.now();
                 let data = {
-                    'nodeId': this.copyNodeChainedId,
-                    'parentId': this.copyNodeChainedParentId
+                    'nodeId': this.copyNodeId,
+                    'parentId': this.copyNodeParentId
                 };
 
-                axios.post(url, data).then((response) => {
-                    this.copyNodeChainedId = null;
-                    this.copyNodeChainedParentId = null;
-                    this.trees = response.data.trees;
-                    this.setData(response, (((performance.now() - t0) / 1000)));
+                axios.post("/node/copy", data).then((response) => {
+                    this.setData(response, (((performance.now() - this.timing.initStart) / 1000)));
                 }).catch((error) => {
-                    this.copyNodeChainedId = null;
-                    this.copyNodeChainedParentId = null;
                     this.setFeedback(error.response.data.message, 'error');
+                }).finally(() => {
+                    clearInterval(this.interval);
+                    clearInterval(this.interval);
+                    this.loading.intermittent = false;
+                    this.copyNodeId = null;
+                    this.copyNodeParentId = null;
                 });
             }
         },

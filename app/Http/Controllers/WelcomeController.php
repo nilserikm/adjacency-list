@@ -12,7 +12,12 @@ class WelcomeController extends Controller
     public $rootId = 1;
     public $companyId = 1;
 
-    public function copyNodeChained(Request $request)
+    /**
+     * Copies a node (with subtree) and appends the copy to the given parent
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function copyNode(Request $request)
     {
         $start = microtime(true);
         $success = false;
