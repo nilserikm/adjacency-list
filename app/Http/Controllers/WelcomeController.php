@@ -335,7 +335,7 @@ class WelcomeController extends Controller
     }
 
     /**
-     * Deletes a node and its children and descendants
+     * Deletes a node and its descendants
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -344,8 +344,12 @@ class WelcomeController extends Controller
         $start = microtime(true);
         $success = false;
         $httpCode = 500;
-        $root = \App\node::find(1);
-        $node = \App\node::find($request->input('deleteId'));
+        $root = \App\node::where('id', $this->rootId)
+            ->where('company_id', $this->companyId)
+            ->first();
+        $node = \App\node::where('id', $request->input('deleteId'))
+            ->where('company_id', $this->companyId)
+            ->first();
 
         if (empty($root)) {
             $message = "root does not exist";
