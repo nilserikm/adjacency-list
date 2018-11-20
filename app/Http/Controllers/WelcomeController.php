@@ -580,24 +580,29 @@ class WelcomeController extends Controller
         $success = false;
         $httpCode = 500;
 
-        $root = \App\node::find(1);
+        $root = \App\node::where('id', $this->rootId)
+            ->where('company_id', $this->companyId)
+            ->first();
 
         if (empty($root)) {
             $message = "root does not exist";
         } else {
-            $tree = $root->getTree();
+            $tree = $root->getDescendantsTree();
             $success = true;
             $message = "Tree data fetched ...";
             $httpCode = 200;
-        }
+         }
+
+         $time = microtime(true) - $start;
+
         return response()->json([
             'success' => $success,
             'message' => $message,
-            'root' => $root,
-            'tree' => $tree,
-            'trees' => $this->getTrees(),
+            'root' => !empty($root) ? $root : null,
+            'tree' => !empty($tree) ? $tree : null,
+            'treeCount' => ($root->countDescendants() + 1),
             'allCount' => $this->getCount($root),
-            'time' => microtime(true) - $start
+            'time' => $time
         ], $httpCode);
     }
 }
