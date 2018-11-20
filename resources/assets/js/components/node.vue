@@ -1,7 +1,14 @@
 <template>
     <div class="nodi-entry">
         <span class="node-title">{{ title }}</span>
-        <button @click="expand">Expand</button>
+        <button
+            v-if="hasChildren"
+            type="button"
+            class="btn btn-sm"
+            @click="expand"
+        >
+            Expand
+        </button>
         <node
             v-for="node in nodes"
             :key="node.id"
@@ -26,6 +33,8 @@
 
     .nodi-entry {
         margin-left: 20px;
+        margin-bottom: 5px;
+        border-bottom: 1px solid lightgray;
     }
 </style>
 
@@ -51,6 +60,20 @@
         methods: {
             expand() {
                 this.display = !this.display;
+            }
+        },
+
+        computed: {
+            hasChildren() {
+                if (typeof this.nodes === "undefined") {
+                    return false;
+                } else if (this.nodes === null) {
+                    return false;
+                } else if (! this.nodes.length > 0) {
+                    return false;
+                } else {
+                    return true;
+                }
             }
         }
     }
