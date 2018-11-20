@@ -106,13 +106,22 @@ class WelcomeController extends Controller
         ], $httpCode);
     }
 
+    /**
+     * Appends a new, empty node to the given nodeId
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function appendNode(Request $request)
     {
         $start = microtime(true);
         $success = false;
         $httpCode = 500;
-        $root = \App\node::find(1);
-        $parent = \App\node::find($request->input('nodeId'));
+        $root = \App\node::where('id', $this->rootId)
+            ->where('company_id', $this->companyId)
+            ->first();
+        $parent = \App\node::where('id', $request->input('nodeId'))
+            ->where('company_id', $this->companyId)
+            ->first();
 
         if (empty($root)) {
             $message = "Unable to find root ...";
@@ -125,7 +134,7 @@ class WelcomeController extends Controller
 
             $success = true;
             $httpCode = 200;
-            $message = "Node appended (" . $node->id . ")";
+            $message = "Empty node appended";
         }
 
         return response()->json([
