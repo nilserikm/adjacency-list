@@ -108,48 +108,11 @@ class NodeController extends Controller
         ], $httpCode);
     }
 
-    public function getRandomLeaf(node $node)
-    {
-        if ($node->hasChildren()) {
-            $child = $node->getChildren()[rand(0, ($node->getChildren()->count() - 1))];
-            return $this->getRandomLeaf($child);
-        }
-
-        return $node;
-    }
-
-    public function randomLeaf(Request $request)
-    {
-        $start = microtime(true);
-        $success = false;
-        $httpCode = 500;
-        $root = node::find(1);
-
-        if (empty($root)) {
-            $message = "Unable to find root ...";
-        } else {
-            $node = $this->getRandomLeaf($root);
-
-            if (is_null($node->parent_id)) {
-                $node->path = $node->title;
-            } else {
-                $node->path = $this->getPath($node);
-            }
-
-            $message = "Random leaf fetched (" . $node->id . ")";
-            $success = true;
-            $httpCode = 200;
-        }
-
-        return response()->json([
-            'success' => $success,
-            'message' => $message,
-            'allCount' => $this->getCount($root),
-            'time' => microtime(true) - $start,
-            'node' => !empty($node) ? $node : null
-        ], $httpCode);
-    }
-
+    /**
+     * Returns a random node from the table
+     * @param null $node
+     * @return null
+     */
     public function getRandomNode($node = null)
     {
         if (is_null($node)) {
@@ -160,45 +123,58 @@ class NodeController extends Controller
         return $node;
     }
 
+    /**
+     * Returns the node's path in the tree
+     * @param $node
+     * @return array|mixed|string
+     */
     public function getPath($node)
     {
-        $path = [];
-        array_unshift($path, $node->title);
+        if (empty($node->parent_id)) {
+            $path = $node->title;
+        } else {
+            $path = [];
+            array_unshift($path, $node->title);
 
-        if (!is_null($node->parent_id)) {
-            $traverse = function($base, &$array) use (&$traverse) {
-                if (!is_null($base->parent_id)) {
-                    $parent = node::find($base->parent_id);
-                    array_unshift($array, $parent->title);
-                    $traverse($parent, $array);
-                }
+            if (!is_null($node->parent_id)) {
+                $traverse = function($base, &$array) use (&$traverse) {
+                    if (!is_null($base->parent_id)) {
+                        $parent = node::find($base->parent_id);
+                        array_unshift($array, $parent->title);
+                        $traverse($parent, $array);
+                    }
 
-                return $array;
-            };
+                    return $array;
+                };
 
-            $path = $traverse($node, $path);
+                $path = $traverse($node, $path);
+            }
+
+            $path = implode(" > ", $path);
         }
 
-        return implode(" > ", $path);
+        return $path;
     }
 
+    /**
+     * Returns a random node from the tree
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function randomNode(Request $request)
     {
         $start = microtime(true);
         $success = false;
         $httpCode = 500;
-        $root = node::find(1);
+        $root = node::where('id', $this->rootId)
+            ->where('company_id', $this->companyId)
+            ->first();
 
         if (empty($root)) {
-            $message = "Unable to find root ...";
+            $message = "Root not found (" . $this->rootId . ")";
         } else {
             $node = $this->getRandomNode();
-
-            if (is_null($node->parent_id)) {
-                $node->path = $node->title;
-            } else {
-                $node->path = $this->getPath($node);
-            }
+            $node->path = $this->getPath($node);
 
             $message = "Random node fetched (" . $node->id . ")";
             $success = true;
@@ -270,6 +246,10 @@ class NodeController extends Controller
         return node::count();
     }
 
+    /**
+     * Returns all roots in the table
+     * @return array
+     */
     public function getTrees()
     {
         $trees = [];
