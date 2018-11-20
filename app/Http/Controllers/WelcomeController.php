@@ -60,9 +60,16 @@ class WelcomeController extends Controller
         $start = microtime(true);
         $success = false;
         $httpCode = 500;
-        $root = \App\node::find($this->rootId);
-        $node = \App\node::find($request->input('nodeId'));
-        $parent = \App\node::find($request->input('parentId'));
+
+        $root = \App\node::where('id', $this->rootId)
+            ->where('company_id', $this->companyId)
+            ->first();
+        $node = \App\node::where('id', $request->input('nodeId'))
+            ->where('company_id', $this->companyId)
+            ->first();
+        $parent = \App\node::where('id', $request->input('parentId'))
+            ->where('company_id', $this->companyId)
+            ->first();
 
         if (empty($root)) {
             $message = "Root not found (" . $this->rootId . ")";
@@ -75,34 +82,29 @@ class WelcomeController extends Controller
             $copy->save();
 
             if ($node->hasChildren()) {
-                $duplicate = function($base, $children) use (&$duplicate) {
-                    foreach($children as $child) {
-                        $clone = $child->replicate();
-                        // $clone->save();
-                        $base->addChild($clone);
-
-                        if ($child->hasChildren()) {
-                            $duplicate($clone, $child->getChildren());
-                        }
-                    }
-
-                    return $base;
-                };
-
-                $subtree = $duplicate($copy, $node->getChildren());
-                $success = true;
-                $message = "Node copied (" . $node->id . ") new id (" . $copy->id . ") to parent (" . $parent->id . ")";
-                $httpCode = 200;
+                $duplicateTimeStart = microtime(true);
+                $copy = Tree::duplicate($copy, $node->getChildren());
+                $duplicateTime = microtime(true) - $duplicateTimeStart;
             }
+
+            $parent->addChild($copy);
+            $time = microtime(true) - $start;
+
+            $success = true;
+            $message = "Node copied (" . $node->id . ") ";
+            $message .= "new id (" . $copy->id . "), ";
+            $message .= "appended to (" . $parent->id . ")";
+            $httpCode = 200;
         }
 
         return response()->json([
             'success' => $success,
             'message' => $message,
             'allCount' => $this->getCount(),
-            'trees' => $this->getTrees(),
-            'time' => microtime(true) - $start,
-            'node' => !empty($node) ? $node : null
+            'treeCount' => ($root->countDescendants() + 1),
+            'time' => $time,
+            'node' => !empty($node) ? $node : null,
+            'duplicateTime' => $duplicateTime
         ], $httpCode);
     }
 
