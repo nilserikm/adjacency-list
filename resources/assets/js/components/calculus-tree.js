@@ -145,36 +145,14 @@ export default {
 
             axios.post("/node/random/node", {}).then((response) => {
                 this.randomNodeInfo = response.data.node;
-                this.setData(response, (((performance.now() - t0) / 1000)));
+                this.setData(response, (((performance.now() - this.timing.initStart) / 1000)));
             }).catch((error) => {
+                this.randomNodeInfo = null;
                 this.setFeedback(error.response.data.message, 'error');
             }).finally(() => {
-                this.randomNodeInfo = null;
                 this.loading = false;
                 clearInterval(this.interval);
             });
-        },
-
-        /**
-         * Duplicates the root's last child to the right of that child
-         * @returns {void}
-         */
-        duplicateById() {
-            let t0 = performance.now();
-            if (isNaN(parseInt(this.duplicateId))) {
-                this.duplicateId = "";
-                this.setFeedback("No node ID specified ...", 'error');
-            } else {
-                let data = { 'duplicateId': this.duplicateId };
-
-                axios.post('/tree/duplicate-by-id', data).then((response) => {
-                    this.duplicateId = "";
-                    this.setData(response, ((performance.now() - t0) / 1000));
-                }).catch((error) => {
-                    this.duplicateId = "";
-                    this.setFeedback(error.response.data.message, 'error');
-                });
-            }
         },
 
         /**
@@ -190,7 +168,7 @@ export default {
                 this.timing.initStart = performance.now();
                 let data = { 'deleteId': this.deleteId };
 
-                axios.post('/tree/delete-by-id', data).then((response) => {
+                axios.post('/node/delete-by-id', data).then((response) => {
                     this.trees = response.data.trees;
                     this.deleteId = "";
                     this.setData(response, ((performance.now() - this.timing.initStart) / 1000));

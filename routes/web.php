@@ -19,15 +19,10 @@ Route::get('/node-calculation', function() {
     return view('node-calculation');
 });
 
-Route::get('/tree', 'WelcomeController@fetchTree');
-Route::post('/tree/add-root-child', 'WelcomeController@addRootChild');
-Route::post('/tree/add-leaf', 'WelcomeController@addLeaf');
-Route::post('/tree/delete-leaf', 'WelcomeController@deleteLeaf');
-Route::post('/tree/delete-by-id', 'WelcomeController@deleteById');
-Route::post('/tree/delete-node-with-children', 'WelcomeController@deleteNodeWithChildren');
-Route::post('/tree/duplicate-by-id', 'WelcomeController@duplicateById');
+Route::get('/tree', 'NodeController@fetchTree');
 
-Route::post('/node/random/node', 'WelcomeController@randomNode');
-Route::post('/node/random/leaf', 'WelcomeController@randomLeaf');
-Route::post('/node/append', 'WelcomeController@appendNode');
-Route::post('/node/copy', 'WelcomeController@copyNode');
+Route::post('/node/delete-by-id', 'NodeController@deleteById');
+Route::post('/node/random/node', 'NodeController@randomNode');
+Route::post('/node/random/leaf', 'NodeController@randomLeaf');
+Route::post('/node/append', 'NodeController@appendNode');
+Route::post('/node/copy', 'NodeController@copyNode');
