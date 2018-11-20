@@ -9,7 +9,8 @@ class CreateNodesTableMigration extends Migration
     {
         Schema::create('nodes', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('parent_id')->unsigned()->nullable();
+            $table->unsignedInteger('company_id')->index();
+            $table->integer('parent_id')->unsigned()->nullable()->index();
             $table->integer('position', false, true);
             $table->integer('real_depth', false, true);
             $table->string('title');
