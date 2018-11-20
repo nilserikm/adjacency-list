@@ -8,19 +8,19 @@ class Tree extends Model
 {
     /**
      * Returns all the trees belonging to the given company
-     * @param int $companyId
+     * @param $roots
      * @return array
      */
-    public static function getTrees(int $companyId)
+    public static function getTrees($roots)
     {
         $trees = [];
-        $roots = Node::where('parent_id', null)
-            ->where('company_id', $companyId)
-            ->get();
 
         foreach ($roots as $root) {
-            $tree = $root->getTree();
-            array_push($trees, $tree);
+            $tree = $root->getDescendantsTree();
+            array_push($trees, [
+                'rootId' => $root->id,
+                'descendants' => $tree
+            ]);
         }
 
         return $trees;
