@@ -59,7 +59,7 @@ class NodeController extends Controller
         return response()->json([
             'success' => $success,
             'message' => $message,
-            'allCount' => $this->getCount(),
+            'allCount' => Node::getCount($this->companyId),
             'treeCount' => ($root->countDescendants() + 1),
             'time' => $time,
             'node' => !empty($node) ? $node : null,
@@ -102,7 +102,7 @@ class NodeController extends Controller
         return response()->json([
             'success' => $success,
             'message' => $message,
-            'allCount' => $this->getCount(),
+            'allCount' => Node::getCount($this->companyId),
             'time' => microtime(true) - $start,
             'node' => !empty($node) ? $node : null
         ], $httpCode);
@@ -184,7 +184,7 @@ class NodeController extends Controller
         return response()->json([
             'success' => $success,
             'message' => $message,
-            'allCount' => $this->getCount($root),
+            'allCount' => Node::getCount($this->companyId),
             'time' => microtime(true) - $start,
             'node' => !empty($node) ? $node : null
         ], $httpCode);
@@ -229,7 +229,7 @@ class NodeController extends Controller
         return response()->json([
             'success' => $success,
             'message' => $message,
-            'allCount' => $this->getCount($root),
+            'allCount' => Node::getCount($this->companyId),
             'deleteId' => $request->input('deleteId'),
             'time' => microtime(true) - $start,
             'node' => !empty($node) ? $node : null
@@ -299,7 +299,7 @@ class NodeController extends Controller
             'root' => !empty($root) ? $root : null,
             'tree' => !empty($tree) ? $tree : null,
             'treeCount' => ($root->countDescendants() + 1),
-            'allCount' => $this->getCount($root),
+            'allCount' => Node::getCount($this->companyId),
             'time' => $time
         ], $httpCode);
     }
