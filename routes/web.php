@@ -31,4 +31,3 @@ Route::post('/node/random/node', 'WelcomeController@randomNode');
 Route::post('/node/random/leaf', 'WelcomeController@randomLeaf');
 Route::post('/node/append', 'WelcomeController@appendNode');
 Route::post('/node/copy', 'WelcomeController@copyNode');
-Route::post('/node/copy-chained', 'WelcomeController@copyNodeChained');
