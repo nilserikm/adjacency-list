@@ -19,7 +19,7 @@ Route::get('/node-calculation', function() {
     return view('node-calculation');
 });
 
-Route::get('/tree', 'NodeController@fetchTree');
+Route::get('/tree', 'NodeController@fetch');
 
 Route::post('/node/delete-by-id', 'NodeController@deleteById');
 Route::post('/node/random/node', 'NodeController@randomNode');

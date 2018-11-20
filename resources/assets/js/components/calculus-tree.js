@@ -36,7 +36,7 @@ export default {
         this.loading = true;
         this.seconds = performance.now();
         this.startInterval();
-        this.fetchData();
+        this.fetch();
     },
 
     methods: {
@@ -187,21 +187,18 @@ export default {
          * Fetch the basic tree-data from the backend
          * @returns {void}
          */
-        fetchData() {
+        fetch() {
             this.startInterval();
             this.timing.initStart = performance.now();
             axios.get('/tree').then((response) => {
-                this.treeCount = response.data.treeCount;
-                this.tree = response.data.tree;
                 this.trees = response.data.trees;
-                this.root = this.tree[0];
+                this.tree = this.trees[0];
                 this.loading = false;
                 this.dataFetched = true;
                 this.setData(response, ((performance.now() - this.timing.initStart) / 1000));
                 clearInterval(this.interval);
             }).catch((error) => {
                 this.setFeedback(error.response.data.message, 'error');
-                console.log(error);
                 clearInterval(this.interval);
             });
         },

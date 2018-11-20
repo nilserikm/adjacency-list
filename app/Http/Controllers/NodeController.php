@@ -237,29 +237,34 @@ class NodeController extends Controller
     }
 
     /**
-     * Returns the count of nodes in the tree, including the root
-     * @param node $root
-     * @return int
+     * Returns all of the company's trees as trees
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function getCount()
+    public function fetch(Request $request)
     {
-        return node::count();
-    }
+        $start = microtime(true);
+        $success = false;
 
-    /**
-     * Returns all roots in the table
-     * @return array
-     */
-    public function getTrees()
-    {
-        $trees = [];
-        $roots = node::getRoots();
-        foreach ($roots as $root) {
-            $instance = $root->getTree();
-            array_push($trees, $instance);
+        try {
+            $trees = Tree::getTrees($this->companyId);
+            $message = "Trees fetched";
+            $success = true;
+            $httpCode = 200;
+        } catch(\Exception $exception) {
+            $message = $exception->getMessage();
+            $httpCode = $exception->getCode();
         }
 
-        return $trees;
+        $time = microtime(true) - $start;
+
+        return response()->json([
+            'success' => $success,
+            'message' => $message,
+            'trees' => !empty($trees) ? $trees : null,
+            'allCount' => Node::getCount($this->companyId),
+            'time' => $time
+        ], $httpCode);
     }
 
     /**
