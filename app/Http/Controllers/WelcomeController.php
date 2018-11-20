@@ -10,6 +10,7 @@ use Illuminate\Support\Collection;
 class WelcomeController extends Controller
 {
     public $rootId = 1;
+    public $companyId = 1;
 
     public function copyNode(Request $request)
     {
