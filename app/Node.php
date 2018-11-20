@@ -34,21 +34,10 @@ class node extends Entity implements nodeInterface
      * empty then all of the company's trees will be fetched and the the count
      * will be done
      * @param int $companyId
-     * @param array|null $trees
      * @return int
      */
-    public static function getCount(int $companyId, array $trees = null)
+    public static function getCount(int $companyId)
     {
-        $count = 0;
-        if (empty($trees)) {
-            $trees = Tree::getTrees($companyId);
-        }
-
-        foreach ($trees as $tree) {
-            $flattened = $tree->toArray();
-            $count += count($flattened);
-        }
-
-        return $count;
+        return node::where('company_id', $companyId)->count();
     }
 }
