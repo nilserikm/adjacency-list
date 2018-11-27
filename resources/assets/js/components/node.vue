@@ -1,8 +1,8 @@
 <template>
     <div class="nodi-entry">
-        <span class="node-title">{{ id }} {{ title }}</span>
-        <span class="node-estimate">{{ estimate }}</span>
-        <span class="node-sum">{{ sum }}</span>
+        <span class="node-title">{{ title }}</span>
+        <span class="node-estimate" style="font-weight: bold; margin-right: 20px;">{{ estimate }}</span>
+        <span v-if="hasChildren" class="node-sum" style="border-bottom: 3px solid indianred;">{{ sum }}</span>
         <button
             v-show="hasChildren"
             type="button"
@@ -138,7 +138,6 @@
 
         watch: {
             'loading': function() {
-                console.log("triggered");
                 if (this.isRoot) {
                     if (this.countChildren(this.children)) {
                         this.calculate(this.estimate, this.children);
