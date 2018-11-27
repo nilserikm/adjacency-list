@@ -4,6 +4,13 @@
         <span class="node-estimate" style="font-weight: bold; margin-right: 20px;">{{ estimate }}</span>
         <span v-if="hasChildren" class="node-sum" style="border-bottom: 3px solid indianred;">{{ sum }}</span>
         <button
+            type="button"
+            class="btn btn-sm"
+            @click="incrementEstimate"
+        >
+            +
+        </button>
+        <button
             v-show="hasChildren"
             type="button"
             class="btn btn-sm"
@@ -22,6 +29,8 @@
             :title="node.title"
             :estimate="node.estimate"
             :show="false"
+            @increment="increment"
+            @recalculate="recalculate"
         >
         </node>
     </div>
@@ -93,12 +102,70 @@
         },
 
         methods: {
+            recalculate() {
+                if (!this.isRoot) {
+                    this.calculate(this.estimate, this.children);
+                    this.$emit('recalculate');
+                } else {
+                    this.calculate(this.estimate, this.children);
+                }
+            },
+
+            increment(value, ids) {
+                if (!this.isRoot) {
+                    ids.push(this.id);
+                    this.$emit('increment', value, ids);
+                } else {
+                    let id = ids.pop();
+                    this.getNode(this.children, id).then((nextNode) => {
+                        this.updateEstimate(ids, nextNode, value).then(() => {
+                            // this.calculate(this.estimate, this.children);
+                            // console.log("done ...");
+                        });
+                    });
+                }
+            },
+
+            updateEstimate(ids, node, value) {
+                return new Promise((resolve) => {
+                    if (!ids.length > 0) {
+                        node.estimate += value;
+                        resolve();
+                    } else {
+                        let id = ids.pop();
+                        this.getNode(node.children, id).then((nextNode) => {
+                            this.updateEstimate(ids, nextNode, value).then(() => {
+                                // this.calculate(this.estimate, this.children);
+                                resolve();
+                            });
+                        });
+                    }
+                });
+            },
+
+            getNode(children, id) {
+                return new Promise((resolve) => {
+                    children.forEach((child) => {
+                        if (child.id === id) {
+                            resolve(child);
+                        }
+                    });
+                });
+            },
+
+            incrementEstimate() {
+                let value = 1;
+                let array = [];
+                array.push(this.id);
+                this.$emit('increment', value, array);
+            },
+
             calculate(estimate, children) {
                 if (!this.countChildren(children)) {
                     this.sum = estimate;
                 } else {
                     for (let i = 0; i < children.length; i++) {
-                        this.sum = estimate += this.calculate(children[i]['estimate'], children[i]['children']);
+                        this.sum = (estimate += this.calculate(children[i]['estimate'], children[i]['children']));
                     }
                 }
 
@@ -155,6 +222,15 @@
                 } else {
                     this.sum = this.estimate;
                 }
+            },
+
+            'estimate': function() {
+                if (this.countChildren(this.children)) {
+                    this.calculate(this.estimate, this.children);
+                } else {
+                    this.sum = this.estimate;
+                }
+                this.$emit('recalculate');
             }
         }
     }
