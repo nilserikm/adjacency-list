@@ -128,28 +128,49 @@
 
         </div>
         <div class="outer-tree-container col-lg-6">
-            <h1>Tree Structure</h1>
+            <h3>Tree Structure</h3>
+            <!--<root-->
+            <!--v-if="rootsFetched"-->
+            <!--v-for="root in roots"-->
+            <!--:key="root.id"-->
+            <!--:title="root.title"-->
+            <!--:id="root.id"-->
+            <!--:loading="loadingRoots[root.id]"-->
+            <!--:descendants="descendants[root.id]"-->
+            <!--&gt;-->
+            <!--</root>-->
+
             <div
                 v-if="rootsFetched"
+                class="tree-container"
                 v-for="root in roots"
                 :key="root.id"
             >
-                {{ root.title }}
+                <div
+                    v-show="loadingRoots[root.id]"
+                    style="display: flex; flex-direction: row;"
+                >
+                    <div>
+                        Henter data for {{ root.title }}
+                    </div>
+                    <scale-loader
+                        height="20px"
+                        width="8px"
+                        style="margin-left: 50px;"
+                    />
+                </div>
+                <node
+                    v-show="!loadingRoots[root.id]"
+                    :children="descendants[root.id]"
+                    :id="root.id"
+                    :isRoot="true"
+                    :title="root.title"
+                    :estimate="root.estimate"
+                    :loading="loadingRoots[root.id]"
+                    :show="false"
+                >
+                </node>
             </div>
-            <!--<div-->
-                <!--v-if="dataFetched"-->
-                <!--class="tree-container"-->
-                <!--v-for="(tree, index) in trees"-->
-                <!--:key="'tree' + index"-->
-            <!--&gt;-->
-                <!--<node-->
-                    <!--:nodes="tree[index].children"-->
-                    <!--:title="tree[index].title"-->
-                    <!--:estimate="tree[index].estimate"-->
-                    <!--:show="false"-->
-                <!--&gt;-->
-                <!--</node>-->
-            <!--</div>-->
         </div>
     </div>
 </template>
@@ -186,7 +207,7 @@
     .load-message {
         text-align: center;
     }
-    
+
     .outer-tree-container {
         display: flex;
         flex-direction: column;

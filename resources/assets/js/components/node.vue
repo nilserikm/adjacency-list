@@ -1,8 +1,10 @@
 <template>
     <div class="nodi-entry">
-        <span class="node-title">{{ title }}</span>
+        <span class="node-title">{{ id }} {{ title }}</span>
+        <span class="node-estimate">{{ estimate }}</span>
+        <span class="node-sum">{{ sum }}</span>
         <button
-            v-if="hasChildren"
+            v-show="hasChildren"
             type="button"
             class="btn btn-sm"
             @click="expand"
@@ -10,10 +12,13 @@
             Expand
         </button>
         <node
-            v-for="node in nodes"
+            v-for="node in children"
             :key="node.id"
-            v-if="display"
-            :nodes="node.children"
+            :id="node.id"
+            :isRoot="false"
+            v-show="display"
+            :children="node.children"
+            :loading="true"
             :title="node.title"
             :estimate="node.estimate"
             :show="false"
@@ -40,39 +45,116 @@
 
 <script>
     export default {
-        props: [
-            'nodes',
-            'title',
-            'estimate',
-            'show'
-        ],
+        props: {
+            'children': {
+                type: Array,
+                default: function() { return [] }
+            },
+            'estimate': {
+                type: Number,
+                default: null
+            },
+            'id': {
+                type: Number,
+                default: 0
+            },
+            'isRoot': {
+                type: Boolean,
+                default: false
+            },
+            'loading': {
+                type: Boolean,
+                default: true
+            },
+            'title': {
+                type: String,
+                default: ""
+            },
+            'show': {
+                type: Boolean,
+                default: false
+            }
+        },
         name: 'node',
         data() {
             return {
-                display: null
+                calculation: 0,
+                display: null,
+                doCalculation: false,
+                sum: 0
             }
         },
 
         mounted() {
             this.display = this.show;
+            if (! this.isRoot) {
+                this.doCalculation = true;
+            }
         },
 
         methods: {
+            calculate(estimate, children) {
+                if (!this.countChildren(children)) {
+                    this.sum = estimate;
+                } else {
+                    for (let i = 0; i < children.length; i++) {
+                        this.sum = estimate += this.calculate(children[i]['estimate'], children[i]['children']);
+                    }
+                }
+
+                return this.sum;
+            },
+
             expand() {
                 this.display = !this.display;
+            },
+
+            countChildren(children) {
+                if (typeof children === "undefined") {
+                    return false;
+                } else if (children === null) {
+                    return false;
+                } else if (! children.length > 0) {
+                    return false;
+                } else {
+                    return true;
+                }
             }
         },
 
         computed: {
             hasChildren() {
-                if (typeof this.nodes === "undefined") {
+                if (typeof this.children === "undefined") {
                     return false;
-                } else if (this.nodes === null) {
+                } else if (this.children === null) {
                     return false;
-                } else if (! this.nodes.length > 0) {
+                } else if (! this.children.length > 0) {
                     return false;
                 } else {
                     return true;
+                }
+            }
+        },
+
+        watch: {
+            'loading': function() {
+                console.log("triggered");
+                if (this.isRoot) {
+                    if (this.countChildren(this.children)) {
+                        this.calculate(this.estimate, this.children);
+                    } else {
+                        this.sum = this.estimate;
+                    }
+                } else {
+                    this.sum = this.estimate;
+                }
+            },
+
+            'doCalculation': function() {
+                if (this.countChildren(this.children)) {
+                    this.calculate(this.estimate, this.children);
+                } else {
+                    this.sum = this.estimate;
                 }
             }
         }

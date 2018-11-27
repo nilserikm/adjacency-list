@@ -14,11 +14,13 @@ export default {
             copyNodeParentId: null,
             countDifference: null,
             deleteId: null,
+            descendants: {},
             duplicateId: null,
             feedback: "",
             feedbackError: false,
             interval: null,
             loading: false,
+            loadingRoots: {},
             randomNodeInfo: null,
             root: null,
             roots: [],
@@ -39,7 +41,6 @@ export default {
         this.seconds = performance.now();
         this.startInterval();
         this.fetchRoots();
-        this.fetchDescendants();
     },
 
     methods: {
@@ -188,19 +189,24 @@ export default {
 
         /**
          * Fetch the basic tree-data from the backend
+         * @param {object} root
          * @returns {void}
          */
-        fetchDescendants() {
+        fetchDescendants(root) {
             this.startInterval();
             this.timing.initStart = performance.now();
-            axios.get('/tree/descendants').then((response) => {
+            let data = { 'rootId': root.id };
+
+            axios.post('/tree/descendants', data).then((response) => {
                 this.loading = false;
-                this.rootsFetched = true;
-                this.trees = response.data.trees;
+                this.descendants[root.id] = response.data.tree;
+                this.loadingRoots[root.id] = false;
+                this.treesFetched = true;
+                this.trees.push(response.data.tree);
                 this.setData(response, ((performance.now() - this.timing.initStart) / 1000));
-                clearInterval(this.interval);
             }).catch((error) => {
                 this.setFeedback(error.response.data.message, 'error');
+            }).finally(() => {
                 clearInterval(this.interval);
             });
         },
@@ -213,9 +219,9 @@ export default {
             this.startInterval();
             this.timing.initStart = performance.now();
             axios.get('/tree/roots').then((response) => {
+                this.roots = response.data.roots;
                 this.loading = false;
                 this.rootsFetched = true;
-                this.roots = response.data.roots;
                 this.setData(response, ((performance.now() - this.timing.initStart) / 1000));
                 clearInterval(this.interval);
             }).catch((error) => {
@@ -264,6 +270,16 @@ export default {
            }
 
             return false;
+        }
+    },
+
+    watch: {
+        'rootsFetched': function() {
+            this.roots.forEach((root) => {
+                this.descendants[root.id] = [];
+                this.loadingRoots[root.id] = true;
+                this.fetchDescendants(root);
+            });
         }
     }
 }
