@@ -230,18 +230,26 @@ class NodeController extends Controller
     {
         $start = microtime(true);
         $success = false;
+        $httpCode = 500;
 
-        try {
-            $roots = node::where('company_id', $this->companyId)
-                ->where('parent_id', null)
-                ->get();
-            $trees = Tree::getTrees($roots);
-            $message = "Trees fetched";
-            $success = true;
-            $httpCode = 200;
-        } catch(\Exception $exception) {
-            $message = $exception->getMessage();
-            $httpCode = $exception->getCode();
+        $rootId = $request->input('rootId');
+        $root = node::where('id', $rootId)
+            ->where('company_id', $this->companyId)
+            ->first();
+
+        if (empty($root)) {
+            $message = "Root (" . $rootId . ") not found";
+        } else {
+            try {
+                $tree = $root->getDescendantsTree();
+                $treeCount = ($root->countDescendants() + 1);
+                $message = "Tree from root " . $rootId . " fetched";
+                $success = true;
+                $httpCode = 200;
+            } catch(\Exception $exception) {
+                $message = $exception->getMessage();
+                $httpCode = $exception->getCode();
+            }
         }
 
         $time = microtime(true) - $start;
@@ -249,7 +257,8 @@ class NodeController extends Controller
         return response()->json([
             'success' => $success,
             'message' => $message,
-            'trees' => !empty($trees) ? $trees : null,
+            'tree' => !empty($tree) ? $tree : null,
+            'treeCount' => !empty($treeCount) ? $treeCount : null,
             'allCount' => Node::getCount($this->companyId),
             'time' => $time
         ], $httpCode);
