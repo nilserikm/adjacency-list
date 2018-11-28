@@ -23,7 +23,7 @@
             :key="node.id"
             :id="node.id"
             :isRoot="false"
-            v-show="display"
+            v-if="display"
             :children="node.children"
             :loading="true"
             :title="node.title"
@@ -96,7 +96,7 @@
 
         mounted() {
             this.display = this.show;
-            if (! this.isRoot) {
+            if (!this.isRoot) {
                 this.doCalculation = true;
             }
         },
