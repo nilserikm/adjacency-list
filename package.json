@@ -19,6 +19,7 @@
         "vue": "^2.5.7"
     },
     "dependencies": {
-        "vue-simple-spinner": "^1.2.8"
+        "vue-simple-spinner": "^1.2.8",
+        "vue-spinner": "^1.0.3"
     }
 }
