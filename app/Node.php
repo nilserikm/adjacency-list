@@ -18,6 +18,11 @@ class node extends Entity implements nodeInterface
      */
     protected $closure = 'App\nodeClosure';
 
+    public function hourRegistrations()
+    {
+        return $this->belongsToMany('App\HourRegistration');
+    }
+
     /**
      * Returns a random node from a randomly chosen tree
      * @param int $companyId
