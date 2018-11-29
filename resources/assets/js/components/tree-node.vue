@@ -1,23 +1,47 @@
 <template>
     <div class="nodi-entry">
-        <span class="node-title">{{ title }}</span>
-        <span class="node-estimate" style="font-weight: bold; margin-right: 20px;">{{ estimate }}</span>
-        <span v-if="hasChildren" class="node-sum" style="border-bottom: 3px solid indianred;">{{ sum }}</span>
-        <button
-            type="button"
-            class="btn btn-sm"
-            @click="incrementEstimate"
-        >
-            +
-        </button>
-        <button
-            v-show="hasChildren"
-            type="button"
-            class="btn btn-sm"
-            @click="expand"
-        >
-            Expand
-        </button>
+        <div class="node-body">
+            <div
+                class="node-title"
+                :class="{ 'root-title': isRoot }"
+            >
+                <a>{{ title }}</a>
+            </div>
+
+            <div class="node-entries">
+                <div class="node-efficiency">
+                    <span>Eff.Hours:</span>
+                    <span>0</span>
+                </div>
+                <div class="node-registered">
+                    <span>Reg.Hours:</span>
+                    <span>0</span>
+                </div>
+                <div v-if="hasChildren" class="node-sum">
+                    <span>Sum:</span>
+                    <span>{{ sum }}</span>
+                </div>
+                <div class="node-estimate">
+                    <span>Estimate:</span>
+                    <span>{{ estimate }}</span>
+                </div>
+                <button
+                    type="button"
+                    class="btn btn-sm btn-primary"
+                    @click="incrementEstimate"
+                >
+                    +
+                </button>
+                <button
+                    v-show="hasChildren"
+                    type="button"
+                    class="btn btn-sm btn-info"
+                    @click="expand"
+                >
+                    Expand
+                </button>
+            </div>
+        </div>
         <tree-node
             v-for="node in children"
             :key="node.id"
@@ -37,18 +61,63 @@
 </template>
 
 <style lang="scss">
-    .hideNode {
-        display: block;
-    }
-
-    .node-title {
-        margin-right: 200px;
-    }
-
     .nodi-entry {
         margin-left: 20px;
         margin-bottom: 5px;
         border-bottom: 1px solid lightgray;
+
+        .node-body {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+
+            .node-title {
+                font-weight: bold;
+                font-size: 20px;
+                background-color: #eee;
+                padding: 5px 10px;
+
+                a {
+                    color: #5e5d5d;
+                }
+            }
+
+            .root-title {
+                background-color: slategray;
+
+                a {
+                    color: white;
+                }
+            }
+
+            .node-entries {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+
+                .node-estimate,
+                .node-sum,
+                .node-efficiency,
+                .node-registered,
+                button {
+                    display: flex;
+                    flex-direction: column;
+                    margin-right: 20px;
+
+                    span:last-child {
+                        font-weight: bold;
+                        font-size: 16px;
+                        text-align: center;
+                    }
+                }
+            }
+        }
+
+    }
+
+    .hideNode {
+        display: block;
     }
 </style>
 
