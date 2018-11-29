@@ -129,17 +129,6 @@
         </div>
         <div class="outer-tree-container col-lg-6">
             <h3>Tree Structure</h3>
-            <!--<root-->
-            <!--v-if="rootsFetched"-->
-            <!--v-for="root in roots"-->
-            <!--:key="root.id"-->
-            <!--:title="root.title"-->
-            <!--:id="root.id"-->
-            <!--:loading="loadingRoots[root.id]"-->
-            <!--:descendants="descendants[root.id]"-->
-            <!--&gt;-->
-            <!--</root>-->
-
             <div
                 v-if="rootsFetched"
                 class="tree-container"
@@ -159,7 +148,7 @@
                         style="margin-left: 50px;"
                     />
                 </div>
-                <node
+                <tree-node
                     v-show="!loadingRoots[root.id]"
                     :children="descendants[root.id]"
                     :id="root.id"
@@ -169,7 +158,7 @@
                     :loading="loadingRoots[root.id]"
                     :show="false"
                 >
-                </node>
+                </tree-node>
             </div>
         </div>
     </div>
