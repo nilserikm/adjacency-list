@@ -13,15 +13,18 @@
                     v-show="loadingRoots[root.id]"
                     style="display: flex; flex-direction: row;"
                 >
-                    <div>
-
-                        Henter data for {{ root.title }}
+                    <div class="node-entry">
+                        <div class="node-title" :class="{ 'root-loading': loadingRoots[root.id] }">
+                            <a>Fetching data ...</a>
+                        </div>
+                        <div class="node-body">
+                            <scale-loader
+                                height="20px"
+                                width="8px"
+                                style="margin-left: 50px;"
+                            />
+                        </div>
                     </div>
-                    <scale-loader
-                        height="20px"
-                        width="8px"
-                        style="margin-left: 50px;"
-                    />
                 </div>
                 <tree-node
                     v-show="!loadingRoots[root.id]"
@@ -180,6 +183,25 @@
 </template>
 
 <style lang="scss">
+    .node-title {
+        font-weight: bold;
+        font-size: 20px;
+        background-color: slategray;
+        padding: 5px 10px;
+
+        a {
+            color: white;
+        }
+    }
+
+    .root-loading {
+        background-color: #eee;
+
+        a {
+            color: slategray;
+        }
+    }
+
     .tree-stats-header {
         h2 {
             display: inline-block;
@@ -230,6 +252,10 @@
 
     .tree-container {
         .node-entry {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            padding: 20px;
             border-top: 1px solid lightgray;
             border-bottom: 1px solid lightgray;
         }

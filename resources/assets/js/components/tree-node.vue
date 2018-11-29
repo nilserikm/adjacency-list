@@ -27,7 +27,7 @@
                 </div>
                 <button
                     type="button"
-                    class="btn btn-sm"
+                    class="btn btn-sm btn-primary"
                     @click="incrementEstimate"
                 >
                     +
@@ -35,7 +35,7 @@
                 <button
                     v-show="hasChildren"
                     type="button"
-                    class="btn btn-sm"
+                    class="btn btn-sm btn-info"
                     @click="expand"
                 >
                     Expand
@@ -74,8 +74,12 @@
             .node-title {
                 font-weight: bold;
                 font-size: 20px;
-                background-color: lightgray;
+                background-color: #eee;
                 padding: 5px 10px;
+
+                a {
+                    color: #5e5d5d;
+                }
             }
 
             .root-title {
