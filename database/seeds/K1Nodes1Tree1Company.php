@@ -44,23 +44,23 @@ class K1Nodes1Tree1Company extends Seeder
             $this->command->info('starting iteration: ' . $iteration);
             $iStart = microtime(true);
 
+            $numBuildings = 1;
             $numBuildings = 5;
             for ($i = 0; $i < $numBuildings; $i++) {
                 $building = new \App\node();
                 $building->title = $buildingNames[$i];
                 $building->company_id = $companyId;
-                // $building->estimate = rand(1, 5);
                 $building->estimate = 0;
                 $building->save();
                 $cloneParentId = $building->id;
 
+                $numPhases = 2;
                 $numPhases = rand(3, 7);
                 $phases = [];
                 for ($j = 0; $j < $numPhases; $j++) {
                     $node = new \App\node([
                         'title' => 'phase ' . $j,
                         'company_id' => $companyId,
-                        // 'estimate' => rand(1, 5)
                         'estimate' => 0
                     ]);
                     array_push($phases, $node);
@@ -71,13 +71,13 @@ class K1Nodes1Tree1Company extends Seeder
                     $this->command->info($phase->title);
                     $cloneNodeId = $phase->id;
 
+                    $numApartments = 2;
                     $numApartments = rand(10, 20);
                     $apartments = [];
                     for ($k = 0; $k < $numApartments; $k++) {
                         $node = new \App\Node([
                             'title' => 'apartment ' . $k,
                             'company_id' => $companyId,
-                            // 'estimate' => rand(1, 5)
                             'estimate' => 0
                         ]);
                         array_push($apartments, $node);
@@ -86,13 +86,13 @@ class K1Nodes1Tree1Company extends Seeder
 
                     foreach ($phase->getChildren() as $apartment) {
 
+                        $numActivities = 2;
                         $numActivities = rand(15, 25);
                         $activities = [];
                         for ($n = 0; $n < $numActivities; $n++) {
                             $node = new \App\Node([
                                 'title' => 'activity ' . $n,
                                 'company_id' => $companyId,
-                                // 'estimate' => rand(1, 5)
                                 'estimate' => rand(1, 100)
                             ]);
                             array_push($activities, $node);
