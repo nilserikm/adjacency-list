@@ -17,7 +17,7 @@
                         <div class="node-title" :class="{ 'root-loading': loadingRoots[root.id] }">
                             <a>Fetching data ...</a>
                         </div>
-                        <div class="node-body">
+                        <div class="node-body" style="padding: 10px;">
                             <scale-loader
                                 height="20px"
                                 width="8px"
