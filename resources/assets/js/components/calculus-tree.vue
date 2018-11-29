@@ -121,6 +121,8 @@
                         <li><span class="dataEntry">parent_id: </span>{{ randomNodeInfo.parent_id }}</li>
                         <li><span class="dataEntry">position: </span>{{ randomNodeInfo.position }}</li>
                         <li><span class="dataEntry">real_depth: </span>{{ randomNodeInfo.real_depth }}</li>
+                        <li><span class="dataEntry">efficiency hours: </span>{{ randomNodeInfo.efficiencyHours }}</li>
+                        <li><span class="dataEntry">registered hours: </span>{{ randomNodeInfo.registeredHours }}</li>
                         <li><span class="dataEntry">path: </span><span class="node-path">{{ randomNodeInfo.path }}</span></li>
                     </ul>
                 </div>

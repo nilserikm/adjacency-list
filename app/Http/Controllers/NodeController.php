@@ -130,6 +130,9 @@ class NodeController extends Controller
         } else {
             $node = Node::getRandom($this->companyId);
             $node->path = Node::getPath($node, $this->companyId);
+            $nodeHours = $this->getNodeHourRegistrations($node->id);
+            $node['efficiencyHours'] = $nodeHours[0]->fp;
+            $node['registeredHours'] = $nodeHours[0]->total;
 
             $message = "Random node fetched (" . $node->id . ")";
             $success = true;
@@ -141,7 +144,8 @@ class NodeController extends Controller
             'message' => $message,
             'allCount' => Node::getCount($this->companyId),
             'time' => microtime(true) - $start,
-            'node' => !empty($node) ? $node : null
+            'node' => !empty($node) ? $node : null,
+            'nodeHours' => $nodeHours
         ], $httpCode);
     }
 
