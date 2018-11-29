@@ -224,12 +224,6 @@ class NodeController extends Controller
         ], $httpCode);
     }
 
-    public function duration(DateTime $date1, DateTime $date2, int $break)
-    {
-        $diff = $date1->diff($date2);
-        return (((($diff->days * 24) + $diff->h) * 60) + $diff->i) - $break;
-    }
-
     public function getNodeHourRegistrations($descendants)
     {
         $ids = implode(", ", $descendants);
