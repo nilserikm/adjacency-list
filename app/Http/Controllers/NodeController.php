@@ -226,6 +226,10 @@ class NodeController extends Controller
         ], $httpCode);
     }
 
+    /**
+     * @param $ids a single id or an array of ids
+     * @return array|mixed
+     */
     public function getNodeHourRegistrations($ids)
     {
         if (!is_array($ids)) {
@@ -245,11 +249,14 @@ class NodeController extends Controller
                 GROUP BY n.id 
         ";
 
-        $hours = DB::select(DB::raw($query));
-
-        return !empty($hours) ? $hours : null;
+        return DB::select(DB::raw($query));
     }
 
+    /**
+     * Gets the root's descendants as a flat array
+     * @param \App\node $root
+     * @return mixed
+     */
     public function getTree($root)
     {
         $query = "
@@ -274,10 +281,18 @@ class NodeController extends Controller
         AND LENGTH(@pv := CONCAT(@pv, ',', node_id))
         ";
 
-        $tree = DB::select(DB::raw($query));
-        return $tree;
+        return DB::select(DB::raw($query));
     }
 
+    /**
+     * Takes a flat array and returns a hierarchically structured array
+     * @param \App\node $root the root for which we are building the
+     * descendants/subtree
+     * @param array $flat
+     * @param $pidKey the name of the parent id
+     * @param null $idKey the name of the id key
+     * @return mixed
+     */
     public function parseTree($root, $flat, $pidKey, $idKey = null)
     {
         $grouped = array();
