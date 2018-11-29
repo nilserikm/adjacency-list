@@ -20,13 +20,13 @@ export default {
             type: Boolean,
             default: true
         },
-        'title': {
-            type: String,
-            default: ""
-        },
         'show': {
             type: Boolean,
             default: false
+        },
+        'title': {
+            type: String,
+            default: ""
         }
     },
 
