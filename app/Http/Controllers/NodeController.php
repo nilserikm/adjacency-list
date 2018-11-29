@@ -224,9 +224,13 @@ class NodeController extends Controller
         ], $httpCode);
     }
 
-    public function getNodeHourRegistrations($descendants)
+    public function getNodeHourRegistrations($ids)
     {
-        $ids = implode(", ", $descendants);
+        if (!is_array($ids)) {
+            $ids = (array)$ids;
+        }
+
+        $ids = implode(", ", $ids);
 
         $query = "
             SELECT n.id AS node_id, SUM((h.efficiency * h.duration)) AS fp, SUM(h.duration) AS total
