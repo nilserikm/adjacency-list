@@ -260,9 +260,9 @@ class NodeController extends Controller
     public function getTree($root)
     {
         $query = "
-        SELECT node_id, parent_id, estimate, position, company_id, title, real_depth, registeredHours, efficiencyHours
+        SELECT id, parent_id, estimate, position, company_id, title, real_depth, registeredHours, efficiencyHours
         FROM (
-            SELECT n.id AS node_id, 
+            SELECT n.id AS id, 
                    n.parent_id AS parent_id, 
                    n.estimate AS estimate,
                    n.position AS position,
@@ -278,7 +278,7 @@ class NodeController extends Controller
             ORDER BY n.parent_id, n.id) nodes_sorted,
           (SELECT @pv := $root->id) initialisation
         WHERE FIND_IN_SET(parent_id, @pv)
-        AND LENGTH(@pv := CONCAT(@pv, ',', node_id))
+        AND LENGTH(@pv := CONCAT(@pv, ',', id))
         ";
 
         return DB::select(DB::raw($query));
@@ -338,7 +338,7 @@ class NodeController extends Controller
         } else {
             try {
                 $treeArray = $this->getTree($root);
-                $tree = $this->parseTree($root, $treeArray, 'parent_id', 'node_id');
+                $tree = $this->parseTree($root, $treeArray, 'parent_id', 'id');
                 $message = "Tree from root " . $rootId . " fetched";
                 $success = true;
                 $httpCode = 200;
