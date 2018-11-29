@@ -16,11 +16,11 @@ class CreateTableHourRegistrations extends Migration
         Schema::create('hour_registrations', function(Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('company_id');
-            $table->float('efficiency');
-            $table->dateTime('to');
-            $table->dateTime('from');
-            $table->unsignedInteger('break');
+            $table->dateTime('end');
+            $table->dateTime('start');
             $table->unsignedInteger('duration');
+            $table->float('efficiency');
+            $table->unsignedInteger('break');
             $table->text('comment');
             $table->timestamps();
         });
