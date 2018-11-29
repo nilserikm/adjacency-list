@@ -15,6 +15,7 @@ export default {
             countDifference: null,
             deleteId: null,
             descendants: {},
+            displayStats: false,
             duplicateId: null,
             feedback: "",
             feedbackError: false,
@@ -44,6 +45,10 @@ export default {
     },
 
     methods: {
+        toggleStats() {
+            this.displayStats = !this.displayStats;
+        },
+
         /**
          * Starts an interval which sets the component's seconds attribute every
          * 10ms, which is used in conjunction with the loader/overlay to display

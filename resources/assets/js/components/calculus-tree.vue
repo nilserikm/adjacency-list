@@ -1,9 +1,54 @@
 <template>
     <div class="outer-container ">
+        <div class="outer-tree-container col-lg-6">
+            <h3>Tree Structure</h3>
+            <div
+                v-if="rootsFetched"
+                class="tree-container"
+                v-for="root in roots"
+                :key="root.id"
+                style="margin-bottom: 50px;"
+            >
+                <div
+                    v-show="loadingRoots[root.id]"
+                    style="display: flex; flex-direction: row;"
+                >
+                    <div>
+
+                        Henter data for {{ root.title }}
+                    </div>
+                    <scale-loader
+                        height="20px"
+                        width="8px"
+                        style="margin-left: 50px;"
+                    />
+                </div>
+                <tree-node
+                    v-show="!loadingRoots[root.id]"
+                    :children="descendants[root.id]"
+                    :id="root.id"
+                    :isRoot="true"
+                    :title="root.title"
+                    :estimate="root.estimate"
+                    :loading="loadingRoots[root.id]"
+                    :show="false"
+                >
+                </tree-node>
+            </div>
+        </div>
         <div class="data-container col-lg-6">
             <!-- General statistics about the tree -->
             <div class="initial-data">
-                <h2>Tree Stats</h2>
+                <div class="tree-stats-header">
+                    <h2>Tree Stats</h2>
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-primary"
+                        @click="toggleStats"
+                    >
+                        Toggle
+                    </button>
+                </div>
                 <ul>
                     <li>Feedback: <span class="dataEntry" v-bind:class="{ error : feedbackError }">{{ feedback }}</span></li>
                     <li>Timing: <span class="dataEntry">{{ timing.backend }} s / {{ timing.frontend }} s</span></li>
@@ -36,137 +81,116 @@
             </div>
 
             <div v-else>
-                <!-- get random node info -->
-                <div class="random-section">
-                    <div class="random-node">
-                        <button
-                            type="button"
-                            class="btn btn-primary btn-sm"
-                            @click="randomNode"
-                        >
-                            Get random node
-                        </button>
+                <div v-if="displayStats">
+                    <!-- get random node info -->
+                    <div class="random-section">
+                        <div class="random-node">
+                            <button
+                                type="button"
+                                class="btn btn-primary btn-sm"
+                                @click="randomNode"
+                            >
+                                Get random node
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Append node -->
-                <div class="tree-section append-node">
-                    <small>Appends a new, single, and empty node to the node id given</small>
+                    <!-- Append node -->
+                    <div class="tree-section append-node">
+                        <small>Appends a new, single, and empty node to the node id given</small>
+                        <div>
+                            <button
+                                type="button"
+                                class="btn btn-primary btn-sm"
+                                @click="appendNode"
+                            >
+                                Append node
+                            </button>
+                            <input
+                                id="append-node-id"
+                                class="form-control"
+                                type="text"
+                                v-model="appendId"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="tree-section copy-node-chained">
+                        <small>Copies the first id, incl. subtree, and appends it to the second id</small>
+                        <small>"Chained-inserts"</small>
+                        <div>
+                            <button
+                                type="button"
+                                class="btn btn-primary btn-sm"
+                                @click="copyNode"
+                            >
+                                Copy node chained
+                            </button>
+                            <input
+                                class="form-control"
+                                type="text"
+                                v-model="copyNodeId"
+                            />
+                            <input
+                                class="form-control"
+                                type="text"
+                                v-model="copyNodeParentId"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Delete a node by id section -->
+                    <div class="tree-section delete-node-by-id">
+                        <small>Deletes the node <strong>incl. subtree</strong></small>
+                        <div>
+                            <button
+                                type="button"
+                                class="btn btn-primary btn-sm"
+                                @click="deleteById"
+                            >
+                                Delete node
+                            </button>
+                            <input
+                                id="delete-node-id"
+                                class="form-control"
+                                type="text"
+                                v-model="deleteId"
+                            />
+                        </div>
+                    </div>
+
                     <div>
-                        <button
-                            type="button"
-                            class="btn btn-primary btn-sm"
-                            @click="appendNode"
-                        >
-                            Append node
-                        </button>
-                        <input
-                            id="append-node-id"
-                            class="form-control"
-                            type="text"
-                            v-model="appendId"
-                        />
+                        <p>Random node info:</p>
+                        <ul v-if="randomNodeInfo !== null">
+                            <li><span class="dataEntry">id: </span>{{ randomNodeInfo.id }}</li>
+                            <li><span class="dataEntry">title: </span>{{ randomNodeInfo.title }}</li>
+                            <li><span class="dataEntry">parent_id: </span>{{ randomNodeInfo.parent_id }}</li>
+                            <li><span class="dataEntry">position: </span>{{ randomNodeInfo.position }}</li>
+                            <li><span class="dataEntry">real_depth: </span>{{ randomNodeInfo.real_depth }}</li>
+                            <li><span class="dataEntry">efficiency hours: </span>{{ randomNodeInfo.efficiencyHours }}</li>
+                            <li><span class="dataEntry">registered hours: </span>{{ randomNodeInfo.registeredHours }}</li>
+                            <li><span class="dataEntry">path: </span><span class="node-path">{{ randomNodeInfo.path }}</span></li>
+                        </ul>
                     </div>
-                </div>
-
-                <div class="tree-section copy-node-chained">
-                    <small>Copies the first id, incl. subtree, and appends it to the second id</small>
-                    <small>"Chained-inserts"</small>
-                    <div>
-                        <button
-                            type="button"
-                            class="btn btn-primary btn-sm"
-                            @click="copyNode"
-                        >
-                            Copy node chained
-                        </button>
-                        <input
-                            class="form-control"
-                            type="text"
-                            v-model="copyNodeId"
-                        />
-                        <input
-                            class="form-control"
-                            type="text"
-                            v-model="copyNodeParentId"
-                        />
-                    </div>
-                </div>
-
-                <!-- Delete a node by id section -->
-                <div class="tree-section delete-node-by-id">
-                    <small>Deletes the node <strong>incl. subtree</strong></small>
-                    <div>
-                        <button
-                            type="button"
-                            class="btn btn-primary btn-sm"
-                            @click="deleteById"
-                        >
-                            Delete node
-                        </button>
-                        <input
-                            id="delete-node-id"
-                            class="form-control"
-                            type="text"
-                            v-model="deleteId"
-                        />
-                    </div>
-                </div>
-
-                <div>
-                    <p>Random node info:</p>
-                    <ul v-if="randomNodeInfo !== null">
-                        <li><span class="dataEntry">id: </span>{{ randomNodeInfo.id }}</li>
-                        <li><span class="dataEntry">title: </span>{{ randomNodeInfo.title }}</li>
-                        <li><span class="dataEntry">parent_id: </span>{{ randomNodeInfo.parent_id }}</li>
-                        <li><span class="dataEntry">position: </span>{{ randomNodeInfo.position }}</li>
-                        <li><span class="dataEntry">real_depth: </span>{{ randomNodeInfo.real_depth }}</li>
-                        <li><span class="dataEntry">efficiency hours: </span>{{ randomNodeInfo.efficiencyHours }}</li>
-                        <li><span class="dataEntry">registered hours: </span>{{ randomNodeInfo.registeredHours }}</li>
-                        <li><span class="dataEntry">path: </span><span class="node-path">{{ randomNodeInfo.path }}</span></li>
-                    </ul>
                 </div>
             </div>
 
-        </div>
-        <div class="outer-tree-container col-lg-6">
-            <h3>Tree Structure</h3>
-            <div
-                v-if="rootsFetched"
-                class="tree-container"
-                v-for="root in roots"
-                :key="root.id"
-            >
-                <div
-                    v-show="loadingRoots[root.id]"
-                    style="display: flex; flex-direction: row;"
-                >
-                    <div>
-                        Henter data for {{ root.title }}
-                    </div>
-                    <scale-loader
-                        height="20px"
-                        width="8px"
-                        style="margin-left: 50px;"
-                    />
-                </div>
-                <tree-node
-                    v-show="!loadingRoots[root.id]"
-                    :children="descendants[root.id]"
-                    :id="root.id"
-                    :isRoot="true"
-                    :title="root.title"
-                    :estimate="root.estimate"
-                    :loading="loadingRoots[root.id]"
-                    :show="false"
-                >
-                </tree-node>
-            </div>
         </div>
     </div>
 </template>
 
 <style lang="scss">
+    .tree-stats-header {
+        h2 {
+            display: inline-block;
+        }
+
+        button {
+            margin-left: 40px;
+            margin-bottom: 20px;
+        }
+    }
+
     .node-path {
         font-size: 18px;
         border-bottom: 3px solid indianred;
