@@ -11,11 +11,11 @@
             <div class="node-entries">
                 <div class="node-efficiency">
                     <span>Eff.Hours:</span>
-                    <span>0</span>
+                    <span>{{ efficiencyHours > 0 ? efficiencyHours : 0 }}</span>
                 </div>
                 <div class="node-registered">
                     <span>Reg.Hours:</span>
-                    <span>0</span>
+                    <span>{{ registeredHours > 0 ? registeredHours : 0 }}</span>
                 </div>
                 <div v-if="hasChildren" class="node-sum">
                     <span>Sum:</span>
@@ -51,7 +51,9 @@
             :children="node.children"
             :loading="true"
             :title="node.title"
+            :efficiencyHours="node.efficiencyHours"
             :estimate="node.estimate"
+            :registeredHours="node.registeredHours"
             :show="false"
             @increment="increment"
             @recalculate="recalculate"

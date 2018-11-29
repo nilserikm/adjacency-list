@@ -4,6 +4,10 @@ export default {
             type: Array,
             default: function() { return [] }
         },
+        'efficiencyHours': {
+            type: Number,
+            default: 0
+        },
         'estimate': {
             type: Number,
             default: null
@@ -19,6 +23,10 @@ export default {
         'loading': {
             type: Boolean,
             default: true
+        },
+        'registeredHours': {
+            type: String,
+            default: "0"
         },
         'show': {
             type: Boolean,

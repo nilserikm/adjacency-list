@@ -32,8 +32,10 @@
                     :id="root.id"
                     :isRoot="true"
                     :title="root.title"
+                    :efficiencyHours="root.efficiencyHours"
                     :estimate="root.estimate"
                     :loading="loadingRoots[root.id]"
+                    :registeredHours="root.registeredHours"
                     :show="false"
                 >
                 </tree-node>
