@@ -7,6 +7,12 @@ class HourRegistrationSeeder extends Seeder
     public $companyId = 1;
     public $break = 30;
 
+    public function duration(DateTime $date1, DateTime $date2, int $break)
+    {
+        $diff = $date1->diff($date2);
+        return (((($diff->days * 24) + $diff->h) * 60) + $diff->i) - $break;
+    }
+
     /**
      * Run the database seeds.
      *
@@ -21,16 +27,19 @@ class HourRegistrationSeeder extends Seeder
             ->where('real_depth', 3)
             ->get();
 
+        $start = new DateTime('2018-11-28T07:30:00');
+        $end = new DateTime('2018-11-28T16:00:00');
+
         foreach ($nodes as $node) {
-            $numHourReg = rand(3, 7);
+            $numHourReg = rand(2, 5);
             for ($i = 0; $i < $numHourReg; $i++) {
                 $hourRegistration = new \App\HourRegistration([
                     'company_id' => $this->companyId,
-                    'efficiency' => (ceil(rand(10, 100))/100),
-                    'to' => new DateTime(),
-                    'from' => new DateTime(),
+                    'start' => $start,
+                    'end' => $end,
+                    'duration' => $this->duration($start, $end, $this->break),
+                    'efficiency' => ((rand(1, 10) * 10) / 100),
                     'break' => $this->break,
-                    'duration' => rand(180, 720),
                     'comment' => $faker->sentence()
                 ]);
                 $hourRegistration->save();
