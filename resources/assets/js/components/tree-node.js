@@ -37,7 +37,11 @@ export default {
             calculation: 0,
             display: null,
             doCalculation: false,
-            sum: 0
+            sum: 0,
+            flashBackground: {
+                estimate: false,
+                sum: false
+            }
         }
     },
 
@@ -133,6 +137,15 @@ export default {
             } else {
                 return true;
             }
+        },
+
+        flash(type) {
+            return new Promise((resolve) => {
+                this.flashBackground[type] = true;
+                setTimeout(() => {
+                    resolve("nalle");
+                }, 500);
+            });
         }
     },
 
@@ -172,12 +185,34 @@ export default {
         },
 
         'estimate': function() {
+                this.flash('estimate').then((response) => {
+                    // do nothing
+                }).catch((error) => {
+                    console.log("something went wrong");
+                    console.log(error);
+                }).finally(() => {
+                    this.flashBackground.estimate = false;
+                });
+
             if (this.countChildren(this.children)) {
                 this.calculate(this.estimate, this.children);
             } else {
                 this.sum = this.estimate;
             }
             this.$emit('recalculate');
+        },
+
+        'sum': function() {
+            if (this.display) {
+                this.flash('sum').then((response) => {
+                    // do nothing
+                }).catch((error) => {
+                    console.log("something went wrong");
+                    console.log(error);
+                }).finally(() => {
+                    this.flashBackground.sum = false;
+                });
+            }
         }
     }
 }

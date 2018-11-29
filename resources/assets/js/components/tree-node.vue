@@ -19,11 +19,11 @@
                 </div>
                 <div v-if="hasChildren" class="node-sum">
                     <span>Sum:</span>
-                    <span>{{ sum }}</span>
+                    <span :class="{ 'flash-sum': flashBackground.sum }">{{ sum }}</span>
                 </div>
                 <div class="node-estimate">
                     <span>Estimate:</span>
-                    <span>{{ estimate }}</span>
+                    <span :class="{ 'flash-estimate': flashBackground.estimate }">{{ estimate }}</span>
                 </div>
                 <button
                     type="button"
@@ -61,6 +61,16 @@
 </template>
 
 <style lang="scss">
+    .flash-sum {
+        background-color: indianred;
+        color: white;
+    }
+
+    .flash-estimate {
+        background-color: mediumseagreen;
+        color: white;
+    }
+
     .nodi-entry {
         margin-left: 20px;
         margin-bottom: 5px;
@@ -95,6 +105,12 @@
                 flex-direction: row;
                 justify-content: space-between;
                 align-items: center;
+
+                div {
+                    span:last-child {
+                        padding: 5px;
+                    }
+                }
 
                 .node-estimate,
                 .node-sum,
