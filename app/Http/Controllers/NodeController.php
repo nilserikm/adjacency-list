@@ -288,6 +288,58 @@ class NodeController extends Controller
         return $descendants;
     }
 
+    public function getTree($root)
+    {
+        $query = "
+        SELECT node_id, parent_id, estimate, position, company_id, title, real_depth, registeredHours, efficiencyHours
+        FROM (
+            SELECT n.id AS node_id, 
+                   n.parent_id AS parent_id, 
+                   n.estimate AS estimate,
+                   n.position AS position,
+                   n.company_id AS company_id,
+                   n.title AS title,
+                   n.real_depth AS real_depth,
+                   SUM(h.duration) AS registeredHours,
+                   SUM(h.duration * h.efficiency) AS efficiencyHours
+            FROM nodes AS n
+                   LEFT JOIN hour_registration_node AS hn ON n.id = hn.node_id
+                   LEFT JOIN hour_registrations AS h ON hn.hour_registration_id = h.id
+            GROUP BY n.id, n.parent_id, n.estimate, n.position, n.company_id, n.title, n.real_depth
+            ORDER BY n.parent_id, n.id) nodes_sorted,
+          (SELECT @pv := $root->id) initialisation
+        WHERE FIND_IN_SET(parent_id, @pv)
+        AND LENGTH(@pv := CONCAT(@pv, ',', node_id))
+        ";
+
+        $tree = DB::select(DB::raw($query));
+        return $tree;
+    }
+
+    public function parseTree($root, $flat, $pidKey, $idKey = null)
+    {
+        $grouped = array();
+        foreach ($flat as $sub){
+            $grouped[$sub->$pidKey][] = $sub;
+        }
+
+        $fnBuilder = function($siblings) use (&$fnBuilder, $grouped, $idKey) {
+            foreach ($siblings as $k => $sibling) {
+                $id = $sibling->$idKey;
+                if(isset($grouped[$id])) {
+                    $sibling->children = $fnBuilder($grouped[$id]);
+                }
+                $siblings[$k] = $sibling;
+            }
+
+            return $siblings;
+        };
+
+        $tree = $fnBuilder($grouped[$root->id]);
+
+        return $tree;
+    }
+
     /**
      * Returns all of the company's roots' descendants
      * @param Request $request
@@ -308,9 +360,8 @@ class NodeController extends Controller
             $message = "Root (" . $rootId . ") not found";
         } else {
             try {
-                $descendants = $this->matchHours($root->getDescendants());
-                $tree = $descendants->toTree();
-                $treeCount = ($root->countDescendants() + 1);
+                $treeArray = $this->getTree($root);
+                $tree = $this->parseTree($root, $treeArray, 'parent_id', 'node_id');
                 $message = "Tree from root " . $rootId . " fetched";
                 $success = true;
                 $httpCode = 200;
@@ -322,8 +373,6 @@ class NodeController extends Controller
         $time = microtime(true) - $start;
 
         return response()->json([
-            'descendants' => !empty($descendants) ? $descendants : null,
-            'hours' => !empty($nodeHours) ? $nodeHours : null,
             'success' => $success,
             'message' => $message,
             'tree' => !empty($tree) ? $tree : null,
