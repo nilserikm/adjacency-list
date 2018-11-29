@@ -1,8 +1,11 @@
 <?php namespace App\Http\Controllers;
 
+use App\HourRegistration;
 use \App\node;
 use \App\Tree;
+use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class NodeController extends Controller
 {
@@ -221,6 +224,32 @@ class NodeController extends Controller
         ], $httpCode);
     }
 
+    public function getNodeHourRegistrations($descendants)
+    {
+        $duration = function(DateTime $date1, DateTime $date2, int $break)
+        {
+            $diff = $date1->diff($date2);
+            return (((($diff->days * 24) + $diff->h) * 60) + $diff->i) - $break;
+        };
+
+        $ids = implode(", ", $descendants);
+
+        $query = "
+            SELECT n.id AS node_id, SUM((h.efficiency * h.duration)) AS fp, SUM(h.duration) AS total
+                FROM hour_registrations AS h
+                    INNER JOIN hour_registration_node AS hn
+                    ON h.id = hn.hour_registration_id
+                        INNER JOIN nodes AS n
+                        ON hn.node_id = n.id
+                WHERE n.id IN ($ids)
+                GROUP BY n.id 
+        ";
+
+        $hours = DB::select(DB::raw($query));
+
+        return !empty($hours) ? $hours : null;
+    }
+
     /**
      * Returns all of the company's roots' descendants
      * @param Request $request
@@ -241,6 +270,13 @@ class NodeController extends Controller
             $message = "Root (" . $rootId . ") not found";
         } else {
             try {
+                $descendants = $root->getDescendants(['id'])->pluck('id');
+                $ids = [];
+                foreach ($descendants as $descendant) {
+                    array_push($ids, $descendant);
+                }
+                $hours = $this->getNodeHourRegistrations($ids);
+
                 $tree = $root->getDescendantsTree();
                 $treeCount = ($root->countDescendants() + 1);
                 $message = "Tree from root " . $rootId . " fetched";
@@ -248,13 +284,13 @@ class NodeController extends Controller
                 $httpCode = 200;
             } catch(\Exception $exception) {
                 $message = $exception->getMessage();
-                $httpCode = $exception->getCode();
             }
         }
 
         $time = microtime(true) - $start;
 
         return response()->json([
+            'hours' => !empty($hours) ? $hours : null,
             'success' => $success,
             'message' => $message,
             'tree' => !empty($tree) ? $tree : null,
