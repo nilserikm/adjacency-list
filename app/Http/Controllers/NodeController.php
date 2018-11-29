@@ -252,42 +252,6 @@ class NodeController extends Controller
         return !empty($hours) ? $hours : null;
     }
 
-    public function mapNodeHours($tree, $nodeHours)
-    {
-        $traverse = function($base) use (&$traverse, &$nodeHours) {
-            $nodeHour = null;
-            for ($i = 0; $i < count($nodeHours); $i++) {
-                if ($base->id === $nodeHours[$i]->node_id) {
-                    $nodeHour = $nodeHours[$i];
-                    $base->efficiencyHours = $nodeHour->efficiencyHours;
-                    $base->registeredHours = $nodeHour->registeredHours;
-                    break;
-                }
-            }
-
-            if ($base->hasChildren()) {
-                foreach ($base->getChildren() as $newBase) {
-                    $traverse($newBase);
-                }
-            }
-        };
-
-        foreach ($tree as $base) {
-            $traverse($base);
-        }
-
-        return $tree;
-    }
-
-    public function matchHours($descendants)
-    {
-        foreach ($descendants as $desc) {
-            $desc->nodeHours = $this->getNodeHourRegistrations($desc->id);
-        }
-
-        return $descendants;
-    }
-
     public function getTree($root)
     {
         $query = "
