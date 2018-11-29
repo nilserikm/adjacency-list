@@ -5,9 +5,9 @@ use Illuminate\Database\Seeder;
 class K1Nodes1Tree1Company extends Seeder
 {
 
-    public $runStats = true;
+    public $runStats = false;
     public $runDuplication = false;
-    public $numIterations = 10;
+    public $numIterations = 1;
     public $companyId = 1;
 
     /**
@@ -21,18 +21,20 @@ class K1Nodes1Tree1Company extends Seeder
 
         // the number of nodes in each level for data-resemblance to a "real"
         // Markhus-project
-//        $numBuildings = 1;
-//        $numPhases = 5;
-//        $numApartments = 7;
-//        $numActivities = 20;
-//        $numLastLevel = 25;
+//        $numBuildings = 3;
+//        $numPhases = 7;
+//        $numApartments = 20;
+//        $numActivities = 25;
+//        $numLastLevel = 0;
 
         // the number of nodes in each level for a "basic" setup
-        $numBuildings = 1;
-        $numPhases = 2;
-        $numApartments = 5;
-        $numActivities = 10;
-        $numLastLevel = 0;
+//        $numBuildings = 1;
+//        $numPhases = 2;
+//        $numApartments = 5;
+//        $numActivities = 10;
+//        $numLastLevel = 0;
+
+        $buildingNames = ["H6-H10", "H2-H5", "R3", "R11", "BZ-VEST"];
 
         $companyId = 1;
         $cloneNodeId = null;
@@ -42,52 +44,70 @@ class K1Nodes1Tree1Company extends Seeder
             $this->command->info('starting iteration: ' . $iteration);
             $iStart = microtime(true);
 
+            $numBuildings = 5;
             for ($i = 0; $i < $numBuildings; $i++) {
                 $building = new \App\node();
-                $building->title = 'building ' . $i;
+                $building->title = $buildingNames[$i];
                 $building->company_id = $companyId;
+                // $building->estimate = rand(1, 5);
+                $building->estimate = 0;
                 $building->save();
                 $cloneParentId = $building->id;
 
+                $numPhases = rand(3, 7);
                 $phases = [];
                 for ($j = 0; $j < $numPhases; $j++) {
                     $node = new \App\node([
                         'title' => 'phase ' . $j,
-                        'company_id' => $companyId
+                        'company_id' => $companyId,
+                        // 'estimate' => rand(1, 5)
+                        'estimate' => 0
                     ]);
                     array_push($phases, $node);
                 }
                 $building->addChildren($phases);
 
                 foreach ($building->getChildren() as $phase) {
+                    $this->command->info($phase->title);
                     $cloneNodeId = $phase->id;
+
+                    $numApartments = rand(10, 20);
                     $apartments = [];
                     for ($k = 0; $k < $numApartments; $k++) {
                         $node = new \App\Node([
                             'title' => 'apartment ' . $k,
-                            'company_id' => $companyId
+                            'company_id' => $companyId,
+                            // 'estimate' => rand(1, 5)
+                            'estimate' => 0
                         ]);
                         array_push($apartments, $node);
                     }
                     $phase->addChildren($apartments);
 
                     foreach ($phase->getChildren() as $apartment) {
+
+                        $numActivities = rand(15, 25);
                         $activities = [];
                         for ($n = 0; $n < $numActivities; $n++) {
                             $node = new \App\Node([
                                 'title' => 'activity ' . $n,
-                                'company_id' => $companyId
+                                'company_id' => $companyId,
+                                // 'estimate' => rand(1, 5)
+                                'estimate' => rand(1, 100)
                             ]);
                             array_push($activities, $node);
                         }
                         $apartment->addChildren($activities);
 
                         foreach ($apartment->getChildren() as $activity) {
+
+                            $numLastLevel = 0;
                             $lastLevels = [];
                             for ($m = 0; $m < $numLastLevel; $m++) {
                                 $node = new \App\Node([
                                     'title' => 'last-level ' . $m,
-                                    'company_id' => $companyId
+                                    'company_id' => $companyId,
+                                    'estimate' => 0
                                 ]);
                                 array_push($lastLevels, $node);
                             }
