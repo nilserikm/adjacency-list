@@ -1,9 +1,7 @@
 <?php namespace App\Http\Controllers;
 
-use App\HourRegistration;
 use \App\node;
 use \App\Tree;
-use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
