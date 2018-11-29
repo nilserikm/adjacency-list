@@ -289,7 +289,7 @@ class NodeController extends Controller
      * @param \App\node $root the root for which we are building the
      * descendants/subtree
      * @param array $flat
-     * @param $pidKey the name of the parent id
+     * @param string $pidKey name of the parent id
      * @param null $idKey the name of the id key
      * @return mixed
      */
