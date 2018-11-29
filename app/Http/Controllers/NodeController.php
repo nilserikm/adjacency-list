@@ -131,8 +131,8 @@ class NodeController extends Controller
             $node = Node::getRandom($this->companyId);
             $node->path = Node::getPath($node, $this->companyId);
             $nodeHours = $this->getNodeHourRegistrations($node->id);
-            $node['efficiencyHours'] = $nodeHours[0]->fp;
-            $node['registeredHours'] = $nodeHours[0]->total;
+            $node['efficiencyHours'] = $nodeHours[0]->efficiencyHours;
+            $node['registeredHours'] = $nodeHours[0]->registeredHours;
 
             $message = "Random node fetched (" . $node->id . ")";
             $success = true;
@@ -237,7 +237,7 @@ class NodeController extends Controller
         $ids = implode(", ", $ids);
 
         $query = "
-            SELECT n.id AS node_id, SUM((h.efficiency * h.duration)) AS fp, SUM(h.duration) AS total
+            SELECT n.id AS node_id, SUM((h.efficiency * h.duration)) AS efficiencyHours, SUM(h.duration) AS registeredHours
                 FROM hour_registrations AS h
                     INNER JOIN hour_registration_node AS hn
                     ON h.id = hn.hour_registration_id
@@ -250,6 +250,42 @@ class NodeController extends Controller
         $hours = DB::select(DB::raw($query));
 
         return !empty($hours) ? $hours : null;
+    }
+
+    public function mapNodeHours($tree, $nodeHours)
+    {
+        $traverse = function($base) use (&$traverse, &$nodeHours) {
+            $nodeHour = null;
+            for ($i = 0; $i < count($nodeHours); $i++) {
+                if ($base->id === $nodeHours[$i]->node_id) {
+                    $nodeHour = $nodeHours[$i];
+                    $base->efficiencyHours = $nodeHour->efficiencyHours;
+                    $base->registeredHours = $nodeHour->registeredHours;
+                    break;
+                }
+            }
+
+            if ($base->hasChildren()) {
+                foreach ($base->getChildren() as $newBase) {
+                    $traverse($newBase);
+                }
+            }
+        };
+
+        foreach ($tree as $base) {
+            $traverse($base);
+        }
+
+        return $tree;
+    }
+
+    public function matchHours($descendants)
+    {
+        foreach ($descendants as $desc) {
+            $desc->nodeHours = $this->getNodeHourRegistrations($desc->id);
+        }
+
+        return $descendants;
     }
 
     /**
@@ -272,14 +308,8 @@ class NodeController extends Controller
             $message = "Root (" . $rootId . ") not found";
         } else {
             try {
-                $descendants = $root->getDescendants(['id'])->pluck('id');
-                $ids = [];
-                foreach ($descendants as $descendant) {
-                    array_push($ids, $descendant);
-                }
-                $hours = $this->getNodeHourRegistrations($ids);
-
-                $tree = $root->getDescendantsTree();
+                $descendants = $this->matchHours($root->getDescendants());
+                $tree = $descendants->toTree();
                 $treeCount = ($root->countDescendants() + 1);
                 $message = "Tree from root " . $rootId . " fetched";
                 $success = true;
@@ -292,7 +322,8 @@ class NodeController extends Controller
         $time = microtime(true) - $start;
 
         return response()->json([
-            'hours' => !empty($hours) ? $hours : null,
+            'descendants' => !empty($descendants) ? $descendants : null,
+            'hours' => !empty($nodeHours) ? $nodeHours : null,
             'success' => $success,
             'message' => $message,
             'tree' => !empty($tree) ? $tree : null,
