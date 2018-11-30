@@ -123,6 +123,32 @@ export default {
             this.$emit('increment', value, array);
         },
 
+        calculateEfficiency(efficiencyHours, children) {
+            efficiencyHours = parseInt(efficiencyHours);
+            if (!this.countChildren(children)) {
+                this.sum.efficiency = efficiencyHours;
+            } else {
+                for (let i = 0; i < children.length; i++) {
+                    this.sum.efficiency = (efficiencyHours += this.calculateEfficiency(children[i]['efficiencyHours'], children[i]['children']));
+                }
+            }
+
+            return this.sum.efficiency;
+        },
+
+        calculateRegistered(registeredHours, children) {
+            registeredHours = parseInt(registeredHours);
+            if (!this.countChildren(children)) {
+                this.sum.registered = registeredHours;
+            } else {
+                for (let i = 0; i < children.length; i++) {
+                    this.sum.registered = (registeredHours += this.calculateRegistered(children[i]['registeredHours'], children[i]['children']));
+                }
+            }
+
+            return this.sum.registered;
+        },
+
         calculateEstimate(estimate, children) {
             if (!this.countChildren(children)) {
                 this.sum.estimate = estimate;
@@ -180,19 +206,29 @@ export default {
             if (this.isRoot) {
                 if (this.countChildren(this.children)) {
                     this.calculateEstimate(this.estimate, this.children);
+                    this.calculateRegistered(this.registeredHours, this.children);
+                    this.calculateEfficiency(this.registeredHours, this.children);
                 } else {
                     this.sum.estimate = this.estimate;
+                    this.sum.registered = this.registeredHours;
+                    this.sum.efficiency = this.efficiencyHours;
                 }
             } else {
                 this.sum.estimate = this.estimate;
+                this.sum.registered = this.registeredHours;
+                this.sum.efficiency = this.efficiencyHours;
             }
         },
 
         'doCalculation': function() {
             if (this.countChildren(this.children)) {
                 this.calculateEstimate(this.estimate, this.children);
+                this.calculateRegistered(this.registeredHours, this.children);
+                this.calculateEfficiency(this.registeredHours, this.children);
             } else {
                 this.sum.estimate = this.estimate;
+                this.sum.registered = this.registeredHours;
+                this.sum.efficiency = this.efficiencyHours;
             }
         },
 

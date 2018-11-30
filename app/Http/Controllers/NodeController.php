@@ -207,6 +207,10 @@ class NodeController extends Controller
             $roots = node::where('company_id', $this->companyId)
                 ->where('parent_id', null)
                 ->get();
+            foreach ($roots as $root) {
+                $root->efficiencyHours = 0;
+                $root->registeredHours = "0";
+            }
             $message = "Roots fetched";
             $success = true;
             $httpCode = 200;
@@ -269,8 +273,8 @@ class NodeController extends Controller
                    n.company_id AS company_id,
                    n.title AS title,
                    n.real_depth AS real_depth,
-                   SUM(h.duration) AS registeredHours,
-                   SUM(h.duration * h.efficiency) AS efficiencyHours
+                   COALESCE(SUM(h.duration), 0) AS registeredHours,
+                   COALESCE(SUM(h.duration * h.efficiency), 0) AS efficiencyHours
             FROM nodes AS n
                    LEFT JOIN hour_registration_node AS hn ON n.id = hn.node_id
                    LEFT JOIN hour_registrations AS h ON hn.hour_registration_id = h.id
