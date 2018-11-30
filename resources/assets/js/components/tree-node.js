@@ -61,12 +61,12 @@ export default {
     },
 
     methods: {
-        recalculate() {
+        recalculateEstimate() {
             if (!this.isRoot) {
-                this.calculate(this.estimate, this.children);
-                this.$emit('recalculate');
+                this.calculateEstimate(this.estimate, this.children);
+                this.$emit('recalculateEstimate');
             } else {
-                this.calculate(this.estimate, this.children);
+                this.calculateEstimate(this.estimate, this.children);
             }
         },
 
@@ -78,7 +78,7 @@ export default {
                 let id = ids.pop();
                 this.getNode(this.children, id).then((nextNode) => {
                     this.updateEstimate(ids, nextNode, value).then(() => {
-                        // this.calculate(this.estimate, this.children);
+                        // this.calculateEstimate(this.estimate, this.children);
                         console.log("done increment ...");
                     });
                 });
@@ -94,7 +94,7 @@ export default {
                     let id = ids.pop();
                     this.getNode(node.children, id).then((nextNode) => {
                         this.updateEstimate(ids, nextNode, value).then(() => {
-                            // this.calculate(this.estimate, this.children);
+                            // this.calculateEstimate(this.estimate, this.children);
                             resolve();
                         });
                     });
@@ -119,12 +119,12 @@ export default {
             this.$emit('increment', value, array);
         },
 
-        calculate(estimate, children) {
+        calculateEstimate(estimate, children) {
             if (!this.countChildren(children)) {
                 this.sum = estimate;
             } else {
                 for (let i = 0; i < children.length; i++) {
-                    this.sum = (estimate += this.calculate(children[i]['estimate'], children[i]['children']));
+                    this.sum = (estimate += this.calculateEstimate(children[i]['estimate'], children[i]['children']));
                 }
             }
 
@@ -175,7 +175,7 @@ export default {
         'loading': function() {
             if (this.isRoot) {
                 if (this.countChildren(this.children)) {
-                    this.calculate(this.estimate, this.children);
+                    this.calculateEstimate(this.estimate, this.children);
                 } else {
                     this.sum = this.estimate;
                 }
@@ -186,28 +186,29 @@ export default {
 
         'doCalculation': function() {
             if (this.countChildren(this.children)) {
-                this.calculate(this.estimate, this.children);
+                this.calculateEstimate(this.estimate, this.children);
             } else {
                 this.sum = this.estimate;
             }
         },
 
         'estimate': function() {
-                this.flash('estimate').then((response) => {
-                    // do nothing
-                }).catch((error) => {
-                    console.log("something went wrong");
-                    console.log(error);
-                }).finally(() => {
-                    this.flashBackground.estimate = false;
-                });
+            this.flash('estimate').then((response) => {
+                // do nothing
+                console.log("done flashing estimate");
+            }).catch((error) => {
+                console.log("something went wrong");
+                console.log(error);
+            }).finally(() => {
+                this.flashBackground.estimate = false;
+            });
 
             if (this.countChildren(this.children)) {
-                this.calculate(this.estimate, this.children);
+                this.calculateEstimate(this.estimate, this.children);
             } else {
                 this.sum = this.estimate;
             }
-            this.$emit('recalculate');
+            this.$emit('recalculateEstimate');
         },
 
         'sum': function() {

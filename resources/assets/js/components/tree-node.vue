@@ -56,7 +56,7 @@
             :registeredHours="node.registeredHours"
             :show="false"
             @increment="increment"
-            @recalculate="recalculate"
+            @recalculateEstimate="recalculateEstimate"
         >
         </tree-node>
     </div>
