@@ -11,15 +11,23 @@
             <div class="node-entries">
                 <div class="node-efficiency">
                     <span>Eff.Hours:</span>
-                    <span>{{ efficiencyHours > 0 ? efficiencyHours : 0 }}</span>
+                    <span v-if="true">
+                        {{ efficiencyHours > 0 ? efficiencyHours : 0 }} /
+                        {{ sum.efficiency }}
+                    </span>
+                    <span v-else>{{ efficiencyHours > 0 ? efficiencyHours : 0 }}</span>
                 </div>
                 <div class="node-registered">
                     <span>Reg.Hours:</span>
-                    <span>{{ registeredHours > 0 ? registeredHours : 0 }}</span>
+                    <span v-if="true">
+                        {{ registeredHours > 0 ? registeredHours : 0 }} /
+                        {{ sum.registered }}
+                    </span>
+                    <span v-else>{{ registeredHours > 0 ? registeredHours : 0 }}</span>
                 </div>
                 <div v-if="hasChildren" class="node-sum">
                     <span>Sum:</span>
-                    <span :class="{ 'flash-sum': flashBackground.sum }">{{ sum }}</span>
+                    <span :class="{ 'flash-sum': flashBackground.sum }">{{ sum.estimate }}</span>
                 </div>
                 <div class="node-estimate">
                     <span>Estimate:</span>

@@ -45,7 +45,11 @@ export default {
             calculation: 0,
             display: null,
             doCalculation: false,
-            sum: 0,
+            sum: {
+                efficiency: 0,
+                estimate: 0,
+                registered: 0
+            },
             flashBackground: {
                 estimate: false,
                 sum: false
@@ -121,14 +125,14 @@ export default {
 
         calculateEstimate(estimate, children) {
             if (!this.countChildren(children)) {
-                this.sum = estimate;
+                this.sum.estimate = estimate;
             } else {
                 for (let i = 0; i < children.length; i++) {
-                    this.sum = (estimate += this.calculateEstimate(children[i]['estimate'], children[i]['children']));
+                    this.sum.estimate = (estimate += this.calculateEstimate(children[i]['estimate'], children[i]['children']));
                 }
             }
 
-            return this.sum;
+            return this.sum.estimate;
         },
 
         expand() {
@@ -177,10 +181,10 @@ export default {
                 if (this.countChildren(this.children)) {
                     this.calculateEstimate(this.estimate, this.children);
                 } else {
-                    this.sum = this.estimate;
+                    this.sum.estimate = this.estimate;
                 }
             } else {
-                this.sum = this.estimate;
+                this.sum.estimate = this.estimate;
             }
         },
 
@@ -188,7 +192,7 @@ export default {
             if (this.countChildren(this.children)) {
                 this.calculateEstimate(this.estimate, this.children);
             } else {
-                this.sum = this.estimate;
+                this.sum.estimate = this.estimate;
             }
         },
 
@@ -206,12 +210,12 @@ export default {
             if (this.countChildren(this.children)) {
                 this.calculateEstimate(this.estimate, this.children);
             } else {
-                this.sum = this.estimate;
+                this.sum.estimate = this.estimate;
             }
             this.$emit('recalculateEstimate');
         },
 
-        'sum': function() {
+        'sum.estimate': function() {
             if (this.display) {
                 this.flash('sum').then((response) => {
                     // do nothing
